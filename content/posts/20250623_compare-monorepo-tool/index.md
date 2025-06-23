@@ -3,7 +3,7 @@ date: 2025-06-23T05:08:00
 draft: false
 tags:
 - monorepo
-title: "Sharing the implement of the monorepo - moon"
+title: "monorepo tool compare bazel & nx & moon"
 ---
 ![alt](images/banner.jpeg)  
 
@@ -20,15 +20,15 @@ Bazel 是由 Google 開發的開源建構和測試工具
 
 使用心得: doc 很難理解, 外加功能其實相對較少  
 使用門檻極高, 一整個弊大於利
-k8s 社群經過一些討論也決定拆掉 bazel  [issues #88553](https://github.com/kubernetes/kubernetes/issues/88553) 
+k8s 社群經過一些討論也決定拆掉 bazel  [issues #88553](https://github.com/kubernetes/kubernetes/issues/88553)   
 簡單來說 鬼東西 別碰  
 
 ### nx
 Nx 是由 Nrwl 開發的 monorepo 工具  
 但其實使用門檻也挺高  
 doc 寫得很隨便 你不去看 source code 根本不會用  
-bug 不少, 且官方也沒有很積極在處理  
-一些照著 getting start 就會碰到的問題也不處理  
+bug 不少, 且官方也沒有很積極在處理 issue  
+甚至一些照著 getting start 就會碰到的問題都沒處理  
 
 ### moon
 Moon 是一個現代化的建構系統和 monorepo 工具，用 Rust 編寫，專注於速度、正確性和開發者體驗  
