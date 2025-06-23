@@ -209,7 +209,7 @@ tasks:
       - ^:build
 ```
 
-執行結果  
+再次執行 `moon project1:build`  
 可以看到因為 project1 deps 包含 library1,library2 因此也會跟著執行  
 ```
 $ moon project1:build
@@ -234,9 +234,9 @@ Tasks: 3 completed
 ## Conclusion
 
 
-以上就是簡單的 monorepo task 　
+以上就是簡單的 monorepo task  
 moon 能提供的遠不如此  
 
 好好善用的話 不只可以簡化 monorepo 管理  
-也因為 cache 機制 能大幅提昇 CI/CD 效率
+也因為 cache 機制 能大幅提昇 CI/CD 效率  
 
