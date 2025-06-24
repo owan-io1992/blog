@@ -86,7 +86,7 @@ wiki 有很多套
   可以安全在 private network 使用  
 - history  
 - comment  
-- support mermaid diagram 
+- support mermaid diagram  
 
 至於實際還有那些功能  
 可以先使用其 cloud 版本體驗看看  

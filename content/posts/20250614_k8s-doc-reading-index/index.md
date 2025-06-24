@@ -73,8 +73,8 @@ docker 偏向小型環境
 - [Concepts - Workloads](/posts/20250617_k8s-doc-reading-concepts-workloads/)
 - [Getting started](/posts/20250618_k8s-doc-reading-getting-started/)
 - [Concepts - Workloads: Workload Management - deployments](/posts/20250620_workload-management-deployments/)
-- [Concepts - Workloads: Workload Management - statefulsets]()
-- [Concepts - Workloads: Workload Management - DaemonSet]()
+- [Concepts - Workloads: Workload Management - statefulsets](/posts/20250623_workload-management-statefulsets/)
+- [Concepts - Workloads: Workload Management - DaemonSet](/posts/20250624_workload-management-demonset/)
 - [Concepts - Workloads: Workload Management - CronJob]()
 - [Concepts - Workloads: Workload Management - Autoscaling Workloads]()
 
