@@ -110,3 +110,4 @@ tolerations(容忍) 就讓 scheduler 忽略 node 身上的 Taints
 
 而前面有提到可以全部或部份 node 執行 daemonset  
 這邊之後會再提到可以用 nodeSelector or nodeAffinity 來達成   
+
