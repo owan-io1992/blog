@@ -10,11 +10,11 @@ title: "k8s doc reading: Concepts - Cluster Architecture: Node"
 <!--more-->
 [doc link](https://kubernetes.io/docs/concepts/architecture/nodes/)  
 
-為避免混淆  
-這裡都是在說 work node  
-也就是專門在跑 user workloads 的 node  
+node 也就是安裝/執行 k8s 的 hardware source  
+可以是 VM 也可以是 Bare Metal  
 
-## add worker node 
+
+## add node 
 
 先告訴大家  
 不同的 k8s distribution 會有不同的 add node 方式  
@@ -22,14 +22,17 @@ title: "k8s doc reading: Concepts - Cluster Architecture: Node"
 除非你是採用 原生的 k8s  
 不然這邊快速了解就好
 
-如果你是採用 cloud provider 的 k8s cluster 
-要新增 node 有兩種方式  
-node name 預設是 host name, 且在 k8s cluster 必須 unique 不能重複  
+如果你是採用 cloud provider 的 k8s cluster  
+沒意外都是 colsole 點個兩下即可
 
+for on-premise  
+要新增 node 有兩種方式  
 - self-registers  
-  kubelet 啟動會自動跟 control plane 註冊
+  kubelet 啟動會自動跟 control plane 註冊  
 - manually add a Node  
-  使用 kubectl 註冊
+  使用 kubectl 註冊  
+
+要注意 node name 預設是 host name, 且在 k8s cluster 必須 unique 不能重複  
 
 > kubectl: 操作 k8s 的工具, 後面會介紹
 
@@ -47,8 +50,8 @@ kubectl describe node
 
 前面有說, kubectl 是我們對 k8s 的操作工具  
 describe node 就是取得 node 的資訊  
-比如說 ip, 執行在該 node 的 pod  
-cpu/memory resource usage
+比如說 node ip, 執行在該 node 的 pod  
+cpu/memory resource usage  
 
 範例  
 ```bash
@@ -179,20 +182,18 @@ Events:
 
 
 從範例中可以看到其實資訊蠻細的  
-所以要看 status 就是記得下 `describe` 就對了
+所以要看 status 就是記得下 `describe` 就對了  
 
 ## Node heartbeats 
 就是在說 control plane 會 monitor node status, default every 5 seconds  
 如果 node 失連  
 scheduler 會避開該 node schedule(編排) pod  
-既有的 pod 也會 evict(驅逐) (重新 schedule 在其他 node)
+既有的 pod 也會 evict(驅逐) (重新 schedule 在其他 node)  
 
 ## maintain a Node 
 
-cordon
-drain
 ### cordon
-如果今天想要進行維護  
+如果今天想要對 node 進行維護  
 我們可以讓 node 進入 `unschedulable` 狀態  
 這是告訴 scheduler 不要再 schedule(編排)新的 pod 到該 node 上  
 但是既有的 pod 不會受到影響  
@@ -217,7 +218,7 @@ kubectl uncordon <node name>
 
 ### drain
 drain 與 cordon 很像  
-不過他更進一步執行 evict(驅逐) pod 的動作  
+不過他更進一步執行 evict(驅逐) 該 node 身上的 pod   
 也就是讓 node 完全沒有 user workload  
 
 可以直接對 node 執行 drain, k8s 會先執行 cordon 才做 evict  
@@ -230,7 +231,7 @@ drain 與 cordon 很像
 kubectl drain --ignore-daemonsets <node name>
 ```
 
-要復原就是讓 node status 變回 schedulable 狀態
+要復原就是讓 node status 變回 schedulable 狀態  
 
 ```bash 
 kubectl uncordon <node name>
@@ -244,6 +245,4 @@ kubectl delete <node name>
 
 ---
 
-以上稍微介紹 node  
-基本上非常單純  
-對於 k8s 而言 就是一個提供 computing 的 node  
+以上稍微介紹 node  基本概念  

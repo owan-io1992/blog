@@ -28,23 +28,27 @@ DB 是 stateful
 - stateless: replica, pod restart(or upgrade...etc) 之間不存在任何關係, 大家都是做一樣的事情,並獨立運作的個體  
 - stateful: 就是與 stateless 相反  
 
-而什麼時候會用到 pod 內多個 container  
-通常來說 只有 monitor 相關的 container 才會住在同個 pod 內   
-
+而什麼時候會用到 pod 內多個 container?  
+舉例來說 monitor 相關的 container 就會住在同個 pod 內   
 
 ## workload resources
 在 k8s 中 pod 的生命週期定義為 defined lifecycle   
 如果今天 work node 掛了, pod 並不會在其他 work node 啟動 因為他已經 "defined"  
 甚至該 node 回來也不會啟動 pod  
+聽起來很怪對吧？ 這樣不是沒有高可用性嗎？  
 
-k8s 有另外的 workload resources 來 define pod lifecycle  
+k8s 有另外的 workload resources 來 maintain pod lifecycle  
 比如說 pod 該有多少 replica / 該住在哪些 work node 上  
-你可以類比成 我們通常是使用 docker compose 來啟動 container 
-而不使用 docker run  
+如果 node 死了, 要怎麼維持執行中的 pod 數量符合預期  
 
 因此雖然 k8s 最小部屬單位是 pod  
-但實際上我們並不直接部屬 pod  
-而是使用 workload resources
+但實際上我們並不直接管理 pod  
+而是使用 workload resources  
+
+workload resources 如果發現因為 node 死掉  
+pod 數量不符合預期  
+就會請 scheduler schedule 新的 pod  
+來維持高可用性  
 
 ### k8s build-in workload resources
 
@@ -60,11 +64,9 @@ Job and CronJob: 執行一次行或是週期性的 pod
 與前面幾個 resource 不同的是 Deployment,StatefulSet,DaemonSet 會讓 pod 一直活著(running)  
 Job and CronJob 則是允許 pod exit(stoped)
 
-
-
 ---
 
-最後再強調一個 k8s 具有擴充能力  
+最後再強調一次 k8s 具有擴充能力  
 如果你以上的 workload resource 不滿足  
 k8s 提供了 CRD([custom resource definition](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/))   
 讓你可以新增你想要的 resource(不限於 workload)  
