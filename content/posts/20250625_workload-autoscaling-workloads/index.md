@@ -69,7 +69,9 @@ k8s 支援但沒有 implement feature, 這種情況在 k8s 中很常發生
 
 那關於 pod cpu/mem 的 metric  
 需要安裝 [metrics-server](https://github.com/kubernetes-sigs/metrics-server)  才能支援  
-安裝  
+k3s 預設已經安裝 metrics-server  
+
+for 其他 distro 可能須自行安裝    
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ```
@@ -92,13 +94,13 @@ allowed min pod count
 HPA 會依據 monitor 到的 pod metric average value 做一個計算  
 得出預期要調整的 replica count 最終會滿足 desire loading  
 
-比如說 desire cpu loading: 100m
-current cpu metric average value: 200m 
-current replica pod count: 1 
+比如說 desire cpu loading: 100m  
+current cpu metric average value: 200m   
+current replica pod count: 1   
 
 那 HPA 就會計算出 replica pod count 改為: 2  
-會滿足 desire cpu loading: 100m
-除了 scale-out 外
+會滿足 desire cpu loading: 100m  
+除了 scale-out 外  
 
 反過來也會 scale-in  
 
@@ -125,3 +127,8 @@ https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resour
 
 最後關於 KEDA  
 之後再找個篇幅說明  
+
+如果是在公有雲的環境下  
+pod 一 scale, node 有需要也會 scale  
+因此 auto 功能做起來後也能夠幫助 manual scale 變輕鬆  
+因此我認為是日常維運相當重要的功能  

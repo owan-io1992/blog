@@ -78,8 +78,7 @@ docker 偏向小型環境
 - [Concepts - Workloads: Workload Management - Jobs](/posts/20250625_workload-management-jobs/)
 - [Concepts - Workloads: Workload Management - CronJob](/posts/20250625_workload-management-cronjob/)
 - [Concepts - Workloads: Autoscaling Workloads](/posts/20250625_workload-autoscaling-workloads/)
-
-- Concepts - Services, Load Balancing, and Networking
+- [Concepts - Services, Load Balancing, and Networking](/posts/20250626_services-loadbalancing-networking/)
 - Concepts - Services, Load Balancing, and Networking: Service
 - Concepts - Services, Load Balancing, and Networking: Ingress,Ingress Controllers
 - Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods
