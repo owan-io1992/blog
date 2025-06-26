@@ -42,7 +42,7 @@ spec:
 用法都一樣  
 這個 sample 就是每分鐘都執行 pod  
 
-要注意的是 這邊是指定 jobTemplate  
+要注意的是 這邊 `.sepc` 下是先是指定 jobTemplate  
 也就是使用 job 的語法  
 換句話說 cronjob 就是先產生 job, 透過 job 執行 pod  
 
