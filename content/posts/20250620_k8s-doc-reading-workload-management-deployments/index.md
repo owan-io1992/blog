@@ -55,16 +55,26 @@ spec: # 開始定義 deployment 內容
         - containerPort: 80
 ```
 
+
+
 會注意到 labels 有三個地方會用到  
 我們先了解 labels 必須一致 才能讓 deplyment 正常運作  
 labels 是讓 deployment/replicaset/pod 這三個 k8s kind 能夠關聯起來的 metadata  
 kind 就是 k8s 裡面的 object, 就是我們常說的(deployment/replicaset/pod...etc)   
 
-ReplicaSet 基本上我們不直接用他  
-交由 deployment 去管理  
-詳細的語法可以參考 [kubernetes-api](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.33/)  建議 basic 都學完了再看  
+記得前面有提到, 我們不直接建立 pod 而是透過 workload resources  
+這個 yaml 其實是宣告建立一個 deployment  
+`.spec.template` 則是建立 ReplicaSet, 另一個 workload resources   
+ReplicaSet 則會建立 pod  
+{{< mermaid >}}  
 
-使用官方提供的 manifest 新增一個 deployment  
+flowchart TD
+    A[Deployment] -- 控制與管理 --> B(ReplicaSet)
+    B -- 建立並維持副本數量 --> C((Pod 1...n))
+{{< /mermaid >}}  
+
+
+實際操作可以使用官方提供的 manifest 新增一個 deployment  
 ```bash
 kubectl apply -f https://k8s.io/examples/controllers/nginx-deployment.yaml
 ```
@@ -171,11 +181,26 @@ deployment 會因為 pod 起不來  因此沒有繼續更新
 因為會需要不斷的使用 get pod 觀察 update 狀態  
 這個問題可以透過 [argoCD](https://argo-cd.readthedocs.io/en/stable/) 解決  
 
+另外從 flow 來看
+deployment 會先建立另一個 ReplicaSet  
+並逐步調整兩個 ReplicaSet 的 pod 數量   
+藉此來 rolling upgrade  
+{{< mermaid >}}  
+graph TD
+    A[Deployment] -- 控制與管理 --> B1(ReplicaSet)
+    A[Deployment] -- 控制與管理 --> B2(ReplicaSet)
+    B1 -- 建立並維持副本數量 --> C1(("tag 1.16.1 
+    Pod 1...n-x"))
+    B2 -- 建立並維持副本數量 --> C2(("tag 1.16.2 
+    Pod 1...x"))
+{{< /mermaid >}}  
+
+這樣也能夠理解 為什麼中間還要再過一層 ReplicaSet 了  
 
 ## Rolling Back a Deployment update 
 
 > 這邊操作有印象即可  
-> 實務來說  我們不會這樣使用   
+> 實務來說  我們不會這樣使用  
 > 通常會使用 IaC 來進行操作  
 
 k8s 會紀錄你的變更紀錄 (預設 10 份)  
@@ -196,7 +221,7 @@ kubectl rollout undo deployment/nginx-deployment --to-revision=2
 ## Scaling a Deployment 
 
 如何修改範例的 replica 數量  
-可以使用
+可以使用  
 
 ```bash
 kubectl scale deployment/nginx-deployment --replicas=10
@@ -215,7 +240,7 @@ kubectl scale deployment/nginx-deployment --replicas=0
 
 前面有故意將 images tag 改為 1.16.123  
 並看到 pod 出現 `ErrImagePull`  
-如果你使用 `k describe pod` 可以看到更多細節
+如果你使用 `k describe pod` 可以看到更多細節  
 
 這邊就不贅述所有狀態了  
 基本上養成善用 `describe` 來進行 debug 就是了  
@@ -226,10 +251,10 @@ kubectl scale deployment/nginx-deployment --replicas=0
 可以使用 `Recreate`  
 來一次行更新所有 pod  
 
-### Rolling Update Deployment
+### Rolling Update Deployment strategy  
 
 RollingUpdate 可以修改他的行為  
-default 情況下是
+default 情況下是  
 
 **maxUnavailable:** default 25%  
 允許 pod stop 的量  
@@ -244,6 +269,6 @@ default 情況下是
 
 當開始 rolling upgrade 時  
 新增的 replica 會先啟動 25%  
- 
+
 
 因此只要控制 maxUnavailable, maxSurge 即可控制 rolling upgrade 的流程  

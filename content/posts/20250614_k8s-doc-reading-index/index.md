@@ -78,11 +78,11 @@ k8s 就像大客車概念
 - [Concepts - Workloads: Workload Management - CronJob](/posts/20250625_k8s-doc-reading-workload-management-cronjob/)
 - [Concepts - Workloads: Autoscaling Workloads](/posts/20250625_k8s-doc-reading-workload-autoscaling-workloads/)
 - [Concepts - Services, Load Balancing, and Networking](/posts/20250626_services-loadbalancing-networking/)
-- Concepts - Services, Load Balancing, and Networking: Service
-- Concepts - Services, Load Balancing, and Networking: Ingress,Ingress Controllers
-- Concepts - Services, Load Balancing, and Networking: Gateway API
-- Concepts - Services, Load Balancing, and Networking: Network Policies
-- Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods
+- [Concepts - Services, Load Balancing, and Networking: Service](/posts/20250626_k8s-doc-reading-services/)
+- [Concepts - Services, Load Balancing, and Networking: Ingress](/posts/20250626_k8s-doc-reading-ingress/)
+- [Concepts - Services, Load Balancing, and Networking: Gateway API](/posts/20250626_k8s-doc-reading-gateway/)
+- [Concepts - Services, Load Balancing, and Networking: Network Policies](/posts/20250626_k8s-doc-reading-network-policy/)
+- [Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods](/posts/20250626_k8s-doc-reading-dns/)
 - Concepts - Storage: Volumes
 - Concepts - Storage: Persistent Volumes
 - Concepts - Storage: Storage Classes

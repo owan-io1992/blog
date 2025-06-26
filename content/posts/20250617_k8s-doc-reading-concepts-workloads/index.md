@@ -42,8 +42,8 @@ k8s 有另外的 workload resources 來 maintain pod lifecycle
 如果 node 死了, 要怎麼維持執行中的 pod 數量符合預期  
 
 因此雖然 k8s 最小部屬單位是 pod  
-但實際上我們並不直接管理 pod  
-而是使用 workload resources  
+但通常我們並不直接建立 pod  
+而是使用 workload resources 間接建立  
 
 workload resources 如果發現因為 node 死掉  
 pod 數量不符合預期  

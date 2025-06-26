@@ -12,7 +12,7 @@ title: "k8s doc reading: Concepts - Workload Management - statefulsets"
 
 如果在前面的 deployment 應該會發現  
 pod name 會有一串 random id  
-statefulset 則是會讓 pod 有固定名稱  
+statefulset 則是會讓 pod 有固定名稱(固定的 hostname)  
 pod 所 mount volume 也會是跟著固定的  
 
 statefulset 適用在以下需求  
@@ -103,18 +103,17 @@ spec:
     *   `name`：必須與 Pod 中定義的 Volume 名稱匹配。
     *   `mountPath`：Volume 在容器內部被掛載的路徑。
 
+定外 statefulset 不會建立 ReplicaSet  
+pod replica 是由 statefulset 直接管理  
+
 ### Deployment and Scaling Guarantees 
 
 create pod 時 pod id 一定是按造順序 {0..N-1}  
 rolling restart 時 一定是按造順序 {0..N-1}  
 scale-in 時 pod id 一定是按造順序 {N-1..0}
-> 如有需要可以設定 .spec.ordinals.start 來改變起始 id 
+> 如有需要可以設定 `.spec.ordinals.start` 來改變起始 id 
 
 再做任何 scaling operation 時, 必須先等全部為 Running and Ready 才能開始動作
-
-Before a Pod is terminated, all of its successors must be completely shutdown.
-
-
 
 ---
 
