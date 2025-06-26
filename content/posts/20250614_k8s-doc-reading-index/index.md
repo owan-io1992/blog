@@ -81,6 +81,8 @@ docker 偏向小型環境
 - [Concepts - Services, Load Balancing, and Networking](/posts/20250626_services-loadbalancing-networking/)
 - Concepts - Services, Load Balancing, and Networking: Service
 - Concepts - Services, Load Balancing, and Networking: Ingress,Ingress Controllers
+- Concepts - Services, Load Balancing, and Networking: Gateway API
+- Concepts - Services, Load Balancing, and Networking: Network Policies
 - Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods
 - Concepts - Storage: Volumes
 - Concepts - Storage: Persistent Volumes
@@ -113,9 +115,8 @@ docker 偏向小型環境
 - Concepts - Workloads - Pods: Pod Lifecycle
 - Concepts - Workloads - Pods: Init Containers ?? Concepts - Containers - Container Lifecycle Hooks
 - Concepts - Workloads - Pods: Sidecar Containers
-- Concepts - Services, Load Balancing, and Networking: Gateway API
+
 - Concepts - Services, Load Balancing, and Networking: EndpointSlices
-- Concepts - Services, Load Balancing, and Networking: Network Policies
 - Concepts - Services, Load Balancing, and Networking: Topology Aware Routing
 
 

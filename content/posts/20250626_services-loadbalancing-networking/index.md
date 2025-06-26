@@ -29,7 +29,7 @@ title: "k8s doc reading: Concepts - Services, Load Balancing, and Networking"
 - NetworkPolicy 可以保護 pod 之間/甚至外部的流量存取,(此功能基本上由 CNI 實做)
 
 
-這邊要特別說明 k8s 沒有 implement 的項目
+這邊要特別說明 k8s implement 的項目
 - pod network  ❌  
 - service  
   - ClusterIP  ✅  
