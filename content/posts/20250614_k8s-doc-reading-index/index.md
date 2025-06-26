@@ -71,12 +71,12 @@ k8s 就像大客車概念
 - [Concepts - Cluster Architecture: Node](/posts/20250617_k8s-doc-reading-concepts-cluster-architecture-node/)
 - [Concepts - Workloads](/posts/20250617_k8s-doc-reading-concepts-workloads/)
 - [Getting started](/posts/20250618_k8s-doc-reading-getting-started/)
-- [Concepts - Workloads: Workload Management - deployments](/posts/20250620_workload-management-deployments/)
-- [Concepts - Workloads: Workload Management - statefulsets](/posts/20250623_workload-management-statefulsets/)
-- [Concepts - Workloads: Workload Management - DaemonSet](/posts/20250624_workload-management-demonset/)
-- [Concepts - Workloads: Workload Management - Jobs](/posts/20250625_workload-management-jobs/)
-- [Concepts - Workloads: Workload Management - CronJob](/posts/20250625_workload-management-cronjob/)
-- [Concepts - Workloads: Autoscaling Workloads](/posts/20250625_workload-autoscaling-workloads/)
+- [Concepts - Workloads: Workload Management - deployments](/posts/20250620_k8s-doc-reading-workload-management-deployments/)
+- [Concepts - Workloads: Workload Management - statefulsets](/posts/20250623_k8s-doc-reading-workload-management-statefulsets/)
+- [Concepts - Workloads: Workload Management - DaemonSet](/posts/20250624_k8s-doc-reading-workload-management-demonset/)
+- [Concepts - Workloads: Workload Management - Jobs](/posts/20250625_k8s-doc-reading-workload-management-jobs/)
+- [Concepts - Workloads: Workload Management - CronJob](/posts/20250625_k8s-doc-reading-workload-management-cronjob/)
+- [Concepts - Workloads: Autoscaling Workloads](/posts/20250625_k8s-doc-reading-workload-autoscaling-workloads/)
 - [Concepts - Services, Load Balancing, and Networking](/posts/20250626_services-loadbalancing-networking/)
 - Concepts - Services, Load Balancing, and Networking: Service
 - Concepts - Services, Load Balancing, and Networking: Ingress,Ingress Controllers
