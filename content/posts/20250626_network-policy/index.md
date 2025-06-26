@@ -1,5 +1,12 @@
-+++
-date = '2025-06-26T14:19:26+08:00'
-draft = true
-title = '20250626_network Policy'
-+++
+---
+date: 2025-06-26T06:23:00
+draft: false
+tags:
+- k8s-reading
+title: "k8s doc reading: Concepts - Services, Load Balancing, and Networking - networking policy"
+---
+![alt](images/banner.png)  
+
+<!--more-->
+[doc link](https://kubernetes.io/docs/concepts/services-networking/service/)   
+

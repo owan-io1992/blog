@@ -1,5 +1,11 @@
-+++
-date = '2025-06-26T14:18:57+08:00'
-draft = true
-title = '20250626_ingress'
-+++
+---
+date: 2025-06-26T06:23:00
+draft: false
+tags:
+- k8s-reading
+title: "k8s doc reading: Concepts - Services, Load Balancing, and Networking - ingress"
+---
+![alt](images/banner.png)  
+
+<!--more-->
+[doc link](https://kubernetes.io/docs/concepts/services-networking/service/)   

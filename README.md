@@ -49,3 +49,10 @@ icons from https://icones.js.org/
 
 update file `themes/LoveIt/layouts/baseof.html:67` 
 
+# banner prompt
+
+```
+create a image with cyberpunk style
+topic: Services 
+with text: Services, Load Balancing, and Networking - Services
+```
