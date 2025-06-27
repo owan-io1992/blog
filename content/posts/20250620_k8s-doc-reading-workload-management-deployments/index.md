@@ -55,25 +55,6 @@ spec: # 開始定義 deployment 內容
         - containerPort: 80
 ```
 
-
-
-會注意到 labels 有三個地方會用到  
-我們先了解 labels 必須一致 才能讓 deplyment 正常運作  
-labels 是讓 deployment/replicaset/pod 這三個 k8s kind 能夠關聯起來的 metadata  
-kind 就是 k8s 裡面的 object, 就是我們常說的(deployment/replicaset/pod...etc)   
-
-記得前面有提到, 我們不直接建立 pod 而是透過 workload resources  
-這個 yaml 其實是宣告建立一個 deployment  
-`.spec.template` 則是建立 ReplicaSet, 另一個 workload resources   
-ReplicaSet 則會建立 pod  
-{{< mermaid >}}  
-
-flowchart TD
-    A[Deployment] -- 控制與管理 --> B(ReplicaSet)
-    B -- 建立並維持副本數量 --> C((Pod 1...n))
-{{< /mermaid >}}  
-
-
 實際操作可以使用官方提供的 manifest 新增一個 deployment  
 ```bash
 kubectl apply -f https://k8s.io/examples/controllers/nginx-deployment.yaml
@@ -85,6 +66,43 @@ $ k get deployment
 NAME               READY   UP-TO-DATE   AVAILABLE   AGE
 nginx-deployment   3/3     3   
 ```
+
+deployment 就是其中一種 workload resource or 又稱 kind   
+nginx-deployment 稱之為 object
+
+記得前面有提到, 我們不直接建立 pod 而是透過 workload resources  
+這個 yaml 是宣告建立一個 kind 是 deployment 的 object  
+`.spec.template` 則是建立 ReplicaSet, 另一個 workload resources   
+ReplicaSet 則會建立 pod  
+> 基本上我們不會直接使用 ReplicaSet  
+
+關係如下  
+{{< mermaid >}}  
+flowchart TD
+    A[Deployment] -- 控制與管理 --> B(ReplicaSet)
+    B -- 建立並維持副本數量 --> C((Pod 1...n))
+{{< /mermaid >}}  
+
+**關於 label**  
+k8s 的 label 是很重要的觀念  
+label 用於建立 k8s 不同 object 之間的關係  
+藉由指定 label 就可以到找對應的 object (一或多個)  
+這邊來說明這裡所用到的 label  
+`.metadata.labels` 是提供給要使用 deplyment 的人使用  
+舉例 只讓 kubectl 顯示符合 label 的 deplyment object 
+```
+$ k get deplyment --selector=app=nginx
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   3/3     3            3           13m
+```
+
+`.spec.selector.matchLabels`
+告訴 ReplicaSet 如何找到 pod 去納管  
+
+`.spec.template.metadata.labels`
+指定建立 pod 時該有的 label  
+
+
 
 READY: 目標要三個 replica 並都已正常啟動
 UP-TO-DATE: 顯示如果有任何 pod 已更新完成(如有進行 rolling update 可以觀察此項目) 
