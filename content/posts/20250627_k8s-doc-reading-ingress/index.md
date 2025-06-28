@@ -156,3 +156,48 @@ spec:
               number: 80
 ```
 
+快速說明下
+.spec.rules[0].host: 指定收到該 host 的 request 才套用此 ingress 
+.spec.rules[0].path: 可以指定 uri forward 給對應的 service 的 pod   
+通常來說 ingress controller 會將 request 直接送給 pod  
+
+## getting start with helm 
+接來我們安裝一個 httpbin server 並使用 ingress 來 expose  
+
+```bash
+helm repo add owan-charts https://owan-io1992.github.io/helm-charts/
+helm repo update
+
+helm upgrade --install my-httpbin owan-charts/httpbin --version 0.1.4 \
+  --set ingress.enabled=true \
+  --set ingress.className=traefik
+```
+
+test
+```bash
+node_ip=<your k8s node ip>
+curl http://chart-example.local --resolve chart-example.local:80:${node_ip}
+```
+
+來看看 ingress object  
+```bash
+$ k get ingress
+NAME         CLASS     HOSTS                 ADDRESS          PORTS   AGE
+my-httpbin   traefik   chart-example.local   192.168.56.101   80      4m49s
+```
+
+可以看到有個 object 'my-httpbin' 使用 ingress class 'traefik' 並 forward host 為 chart-example.local 的 request  
+至於 ADDRESS 跟 PORTS 的部份參考即可, k8s 不會列出全部    
+這邊因為 k3s 會 listen 所有 node 的 80,443 port 給 traefik  
+所以 request 送給任一 node 的 80,443 都行  
+
+想看看 yaml 怎麼寫的  
+可以用 `k get ingress my-httpbin -o yaml`  
+
+---
+
+以上就是 ingress 的快速設定  
+事實上 ingress 能做的事情很多  
+比如說 loadbalance mode  
+ssl terminal  
+因此是很常見的 expose service 的方法  
