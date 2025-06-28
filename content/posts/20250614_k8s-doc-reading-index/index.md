@@ -71,6 +71,7 @@ k8s 就像大客車概念
 - [Concepts - Cluster Architecture: Node](/posts/20250617_k8s-doc-reading-concepts-cluster-architecture-node/)
 - [Concepts - Workloads](/posts/20250617_k8s-doc-reading-concepts-workloads/)
 - [Getting started](/posts/20250618_k8s-doc-reading-getting-started/)
+- [Getting started-helm](/posts/20250627_k8s-doc-reading-getting-started-helm/)
 - [Concepts - Workloads: Workload Management - deployments](/posts/20250620_k8s-doc-reading-workload-management-deployments/)
 - [Concepts - Workloads: Workload Management - statefulsets](/posts/20250623_k8s-doc-reading-workload-management-statefulsets/)
 - [Concepts - Workloads: Workload Management - DaemonSet](/posts/20250624_k8s-doc-reading-workload-management-demonset/)
@@ -79,10 +80,10 @@ k8s 就像大客車概念
 - [Concepts - Workloads: Autoscaling Workloads](/posts/20250625_k8s-doc-reading-workload-autoscaling-workloads/)
 - [Concepts - Services, Load Balancing, and Networking](/posts/20250626_services-loadbalancing-networking/)
 - [Concepts - Services, Load Balancing, and Networking: Service](/posts/20250626_k8s-doc-reading-services/)
-- [Concepts - Services, Load Balancing, and Networking: Ingress](/posts/20250626_k8s-doc-reading-ingress/)
-- [Concepts - Services, Load Balancing, and Networking: Gateway API](/posts/20250626_k8s-doc-reading-gateway/)
-- [Concepts - Services, Load Balancing, and Networking: Network Policies](/posts/20250626_k8s-doc-reading-network-policy/)
-- [Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods](/posts/20250626_k8s-doc-reading-dns/)
+- [Concepts - Services, Load Balancing, and Networking: Ingress](/posts/20250627_k8s-doc-reading-ingress/)
+- [Concepts - Services, Load Balancing, and Networking: Gateway API](/posts/20250627_k8s-doc-reading-gateway/)
+- [Concepts - Services, Load Balancing, and Networking: Network Policies](/posts/20250627_k8s-doc-reading-network-policy/)
+- [Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods](/posts/20250627_k8s-doc-reading-dns/)
 - Concepts - Storage: Volumes
 - Concepts - Storage: Persistent Volumes
 - Concepts - Storage: Storage Classes

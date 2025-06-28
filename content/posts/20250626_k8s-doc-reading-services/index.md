@@ -94,22 +94,22 @@ spec:
 service default 會建立 cluster IP  
 他還支援其他機種 type  
 
-**ClusterIP**  
+- **ClusterIP**  
 建立 cluster IP, 此 IP 僅能 cluster 內部使用  
 用在 cluster 內 pod to pod 溝通  
  
-**NodePort**
+- **NodePort**
 除了建立 cluster IP 外  
 在每個 node 身上都會開一個 port 給 cluster 外部存取(所有 node 都是同個 port)  
 port 可自訂或隨機分配(default)  
 
-**LoadBalancer**
+- **LoadBalancer**
 k8s 沒有 implement  
 除了建立 cluster IP 外, 還會再拿到一個 EXTERNAL-IP 給外部存取    
 簡單來說就是給 cloud provider 接他們的 loadbalancer  
 實際怎麼用就看不同的 cloud provider 怎麼實做  
 
-**ExternalName**
+- **ExternalName**
 建立一個 DNS CNAME record  
 指到你想要的地方  
 
