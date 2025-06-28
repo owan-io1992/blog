@@ -115,16 +115,17 @@ host network and host port 可以直接理解為 docker 的 host network 跟 por
 另外根據情況 ingress controller 可以將 request 送給 service  
 不過當然會喪失 loadbalance mode 能力... etc  
  
-## ingress controller 
+## install ingress controller 
 
 k8s 官網有列出可用的 [ingress-controllers](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)  
 當然是包含但不限於了  
 
 如果是初學者 可以安裝 k8s 維護的 [ingress-nginx](https://github.com/kubernetes/ingress-nginx/blob/main/README.md#readme)  
 
-要注意的是 ingress-nginx 是 k8s 維護  
+要注意的是 ingress-controllers 清單上面你會看到兩個 nginx  
+ingress-nginx 是 k8s 維護  
 nginx-ingress-controller 則是由 F5 官方維護  
-功能上會有差異  
+功能/使用上會有差異  
 
 而不只 nginx 會鬧雙胞胎, haproxy 也是  
 因此在使用上需要特別注意  
