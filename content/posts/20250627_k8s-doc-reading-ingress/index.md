@@ -169,7 +169,7 @@ spec:
 helm repo add owan-charts https://owan-io1992.github.io/helm-charts/
 helm repo update
 
-helm upgrade --install my-httpbin owan-charts/httpbin --version 0.1.4 \
+helm upgrade --install my-httpbin owan-charts/httpbin --version 0.1.6 \
   --set ingress.enabled=true \
   --set ingress.className=traefik
 ```

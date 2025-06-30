@@ -84,10 +84,10 @@ k8s 就像大客車概念
 - [Concepts - Services, Load Balancing, and Networking: Gateway API](/posts/20250627_k8s-doc-reading-gateway/)
 - [Concepts - Services, Load Balancing, and Networking: Network Policies](/posts/20250627_k8s-doc-reading-network-policy/)
 - [Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods](/posts/20250627_k8s-doc-reading-dns/)
-- Concepts - Storage: Volumes
-- Concepts - Storage: Persistent Volumes
-- Concepts - Storage: Storage Classes
-- Concepts - Storage: Dynamic Volume Provisioning
+- [Concepts - Storage: Volumes](/posts/20250630_storage-volume/)
+- [Concepts - Storage: Persistent Volumes](/posts/20250630_storage-persistent-volume/)
+- [Concepts - Storage: Storage Classes](/posts/20250630_storage-storage-classes/)
+- [Concepts - Storage: Dynamic Volume Provisioning](/posts/20250630_storage-dynamic-volume-provisioning/)
 - Concepts - Configuration - Configuration Best Practices
 - Concepts - Configuration - ConfigMaps
 - Concepts - Configuration - Secrets

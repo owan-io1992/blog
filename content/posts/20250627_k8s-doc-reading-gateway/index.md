@@ -64,7 +64,7 @@ traefik   traefik.io/gateway-controller   True       20s
 
 
 ```bash
-helm upgrade --install my-httpbin owan-charts/httpbin --version 0.1.5 \
+helm upgrade --install my-httpbin owan-charts/httpbin --version 0.1.6 \
   --set gateway.enabled=true \
   --set gateway.gatewayClassName=traefik
 ```
