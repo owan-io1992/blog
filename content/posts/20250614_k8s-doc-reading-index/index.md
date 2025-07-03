@@ -85,13 +85,10 @@ k8s 就像大客車概念
 - [Concepts - Services, Load Balancing, and Networking: Network Policies](/posts/20250627_k8s-doc-reading-network-policy/)
 - [Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods](/posts/20250627_k8s-doc-reading-dns/)
 - [Concepts - Storage: Volumes](/posts/20250630_storage-volume/)
-- [Concepts - Storage: Persistent Volumes](/posts/20250630_storage-persistent-volume/)
-- [Concepts - Storage: Storage Classes](/posts/20250630_storage-storage-classes/)
-- [Concepts - Storage: Dynamic Volume Provisioning](/posts/20250630_storage-dynamic-volume-provisioning/)
-- Concepts - Configuration - Configuration Best Practices
-- Concepts - Configuration - ConfigMaps
-- Concepts - Configuration - Secrets
-- Concepts - Configuration - Liveness, Readiness, and Startup Probes
+- [Concepts - Storage: Volumes - Storage](/posts/20250703_storage-volume-storage/)
+- [Concepts - Configuration - ConfigMaps](/posts//)
+- [Concepts - Configuration - Secrets](/posts//)
+- [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts//)
 - Concepts - Configuration - Resource Management for Pods and Containers
 - Concepts - Security
 - Concepts - Security: Service Accounts
