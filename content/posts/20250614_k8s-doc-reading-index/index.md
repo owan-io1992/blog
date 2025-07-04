@@ -78,20 +78,19 @@ k8s 就像大客車概念
 - [Concepts - Workloads: Workload Management - Jobs](/posts/20250625_k8s-doc-reading-workload-management-jobs/)
 - [Concepts - Workloads: Workload Management - CronJob](/posts/20250625_k8s-doc-reading-workload-management-cronjob/)
 - [Concepts - Workloads: Autoscaling Workloads](/posts/20250625_k8s-doc-reading-workload-autoscaling-workloads/)
-- [Concepts - Services, Load Balancing, and Networking](/posts/20250626_services-loadbalancing-networking/)
+- [Concepts - Services, Load Balancing, and Networking](/posts/20250626_k8s-doc-reading-services-loadbalancing-networking/)
 - [Concepts - Services, Load Balancing, and Networking: Service](/posts/20250626_k8s-doc-reading-services/)
 - [Concepts - Services, Load Balancing, and Networking: Ingress](/posts/20250627_k8s-doc-reading-ingress/)
 - [Concepts - Services, Load Balancing, and Networking: Gateway API](/posts/20250627_k8s-doc-reading-gateway/)
 - [Concepts - Services, Load Balancing, and Networking: Network Policies](/posts/20250627_k8s-doc-reading-network-policy/)
 - [Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods](/posts/20250627_k8s-doc-reading-dns/)
-- [Concepts - Storage: Volumes](/posts/20250630_storage-volume/)
-- [Concepts - Storage: Volumes - Storage](/posts/20250703_storage-volume-storage/)
-- [Concepts - Configuration - ConfigMaps](/posts/20250703_configuration-configmaps/)
-- [Concepts - Configuration - Secrets](/posts/20250703_configuration-secrets/)
-- [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts/20250703_configuration-probes/)
-- [Concepts - Configuration - Resource Management for Pods and Containers](/posts/20250704_configuration-resource_managementvfor_pods_and_containers/)
-- Concepts - Security
-- Concepts - Security: Service Accounts
+- [Concepts - Storage: Volumes](/posts/20250702_k8s-doc-reading-storage-volume/)
+- [Concepts - Storage: Volumes - Storage](/posts/20250703_k8s-doc-reading-storage-volume-storage/)
+- [Concepts - Configuration - ConfigMaps](/posts/20250703_k8s-doc-reading-configuration-configmaps/)
+- [Concepts - Configuration - Secrets](/posts/20250703_k8s-doc-reading-configuration-secrets/)
+- [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts/20250703_k8s-doc-reading-configuration-probes/)
+- [Concepts - Configuration - Resource Management for Pods and Containers](/posts/20250704_k8s-doc-reading-configuration-resource_management_for_pods_and_containers/)
+- [Concepts - RBAC](/posts/20250704_k8s-doc-reading-RBAC/)
 - Concepts - Scheduling, Preemption and Eviction: Kubernetes Scheduler
 - Concepts - Scheduling, Preemption and Eviction: Assigning Pods to Nodes
 - Concepts - Scheduling, Preemption and Eviction: Taints and Tolerations

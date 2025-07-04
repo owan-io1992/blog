@@ -25,7 +25,7 @@ This command starts a local development server and opens up a browser window. Mo
 hugo new content [path] [flags]
 
 eg.
-hugo new content content/posts/20250704_configuration-resource_managementvfor_pods_and_containers/index.md
+hugo new content content/posts/20250704_k8s-doc-reading-RBAC/index.md
 ```
 
 ## Build
