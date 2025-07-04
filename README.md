@@ -25,7 +25,7 @@ This command starts a local development server and opens up a browser window. Mo
 hugo new content [path] [flags]
 
 eg.
-hugo new content content/posts/20250703_configuration-secrets/index.md
+hugo new content content/posts/20250703_configuration-probes/index.md
 ```
 
 ## Build
@@ -52,7 +52,7 @@ update file `themes/LoveIt/layouts/baseof.html:67`
 # banner prompt
 
 ```
-create a image with cyberpunk style
-topic: Services 
-with text: Services, Load Balancing, and Networking - Services
+give me comic style 
+The screen is divided into three grids, representing live, read, and startup. The three grids are combined to form k8s
+with text:Liveness, Readiness, and Startup Probes
 ```

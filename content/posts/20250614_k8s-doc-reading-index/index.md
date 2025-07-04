@@ -86,9 +86,9 @@ k8s 就像大客車概念
 - [Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods](/posts/20250627_k8s-doc-reading-dns/)
 - [Concepts - Storage: Volumes](/posts/20250630_storage-volume/)
 - [Concepts - Storage: Volumes - Storage](/posts/20250703_storage-volume-storage/)
-- [Concepts - Configuration - ConfigMaps](/posts//)
-- [Concepts - Configuration - Secrets](/posts//)
-- [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts//)
+- [Concepts - Configuration - ConfigMaps](/posts/20250703_configuration-configmaps/)
+- [Concepts - Configuration - Secrets](/posts/20250703_configuration-secrets/)
+- [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts/20250703_configuration-probes/)
 - Concepts - Configuration - Resource Management for Pods and Containers
 - Concepts - Security
 - Concepts - Security: Service Accounts
