@@ -89,7 +89,7 @@ k8s 就像大客車概念
 - [Concepts - Configuration - ConfigMaps](/posts/20250703_configuration-configmaps/)
 - [Concepts - Configuration - Secrets](/posts/20250703_configuration-secrets/)
 - [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts/20250703_configuration-probes/)
-- Concepts - Configuration - Resource Management for Pods and Containers
+- [Concepts - Configuration - Resource Management for Pods and Containers](/posts/20250704_configuration-resource_managementvfor_pods_and_containers/)
 - Concepts - Security
 - Concepts - Security: Service Accounts
 - Concepts - Scheduling, Preemption and Eviction: Kubernetes Scheduler

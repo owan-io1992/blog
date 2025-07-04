@@ -25,7 +25,7 @@ This command starts a local development server and opens up a browser window. Mo
 hugo new content [path] [flags]
 
 eg.
-hugo new content content/posts/20250703_configuration-probes/index.md
+hugo new content content/posts/20250704_configuration-resource_managementvfor_pods_and_containers/index.md
 ```
 
 ## Build
@@ -53,6 +53,6 @@ update file `themes/LoveIt/layouts/baseof.html:67`
 
 ```
 give me comic style 
-The screen is divided into three grids, representing live, read, and startup. The three grids are combined to form k8s
-with text:Liveness, Readiness, and Startup Probes
+The screen is divided into 6 grids, Requests and limits.
+with text:Resource Management for Pods and Containers
 ```
