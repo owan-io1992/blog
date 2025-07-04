@@ -90,9 +90,7 @@ k8s 就像大客車概念
 - [Concepts - Configuration - Secrets](/posts/20250703_k8s-doc-reading-configuration-secrets/)
 - [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts/20250703_k8s-doc-reading-configuration-probes/)
 - [Concepts - Configuration - Resource Management for Pods and Containers](/posts/20250704_k8s-doc-reading-configuration-resource_management_for_pods_and_containers/)
-- [Concepts - RBAC](/posts/20250704_k8s-doc-reading-RBAC/)
-- Concepts - Scheduling, Preemption and Eviction: Kubernetes Scheduler
-- Concepts - Scheduling, Preemption and Eviction: Assigning Pods to Nodes
+- [Concepts - Scheduling, Preemption and Eviction: Assigning Pods to Nodes]((/posts//))
 - Concepts - Scheduling, Preemption and Eviction: Taints and Tolerations
 - Concepts - Cluster Administration: Node Shutdowns
 - Concepts - Cluster Administration: Node Autoscaling
