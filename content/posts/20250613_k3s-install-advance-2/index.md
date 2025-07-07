@@ -181,8 +181,10 @@ Conditions:
 
 ```bash
 # install CNI
+CILIUM_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium/main/stable.txt)
+
 cilium install \
-  --version v1.17.4 \
+  --version ${CILIUM_VERSION} \
   --set=ipam.operator.clusterPoolIPv4PodCIDRList="10.42.0.0/16" \
   --set kubeProxyReplacement=true \
   --set k8sServiceHost=192.168.56.100 \

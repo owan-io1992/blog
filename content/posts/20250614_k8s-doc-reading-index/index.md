@@ -90,18 +90,10 @@ k8s 就像大客車概念
 - [Concepts - Configuration - Secrets](/posts/20250703_k8s-doc-reading-configuration-secrets/)
 - [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts/20250703_k8s-doc-reading-configuration-probes/)
 - [Concepts - Configuration - Resource Management for Pods and Containers](/posts/20250704_k8s-doc-reading-configuration-resource_management_for_pods_and_containers/)
-- [Concepts - Scheduling, Preemption and Eviction: Assigning Pods to Nodes]((/posts//))
-- Concepts - Scheduling, Preemption and Eviction: Taints and Tolerations
-- Concepts - Cluster Administration: Node Shutdowns
-- Concepts - Cluster Administration: Node Autoscaling
-- Concepts - Overview: Objects In Kubernetes
-- Getting started - Learning environment
-
-- Getting started - Container Runtimes
-- Administer a Cluster: Administration with kubeadm
-- Reference - Command line tool (kubectl): Introduction to kubectl
-- Reference - Command line tool (kubectl): kubectl Quick Reference
-- Getting started - Installing Kubernetes with deployment tools
+- [Concepts - Scheduling, Preemption and Eviction: Assigning Pods to Nodes](/posts/20250704_k8s-doc-reading-assign_pod_to_node/)
+- [Concepts - Scheduling, Preemption and Eviction: Taints and Tolerations](/posts/20250704_k8s-doc-reading-taint-and-toleration/)
+- [Concepts - Cluster Administration: Node Shutdowns]()
+- [Concepts - Overview: Objects In Kubernetes]()
 
 ### intermediate
 - Concepts - Workloads: Autoscaling Workloads
