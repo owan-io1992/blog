@@ -52,7 +52,7 @@ update file `themes/LoveIt/layouts/baseof.html:67`
 # banner prompt
 
 ```
-give me comic style 
-The screen is divided into 6 grids, Requests and limits.
-with text:Resource Management for Pods and Containers
+give me 'The Terminator' style 
+about terminate k8s Node
+with text:Cluster Administration - Node Shutdowns
 ```
