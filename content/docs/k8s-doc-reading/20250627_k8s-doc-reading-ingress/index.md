@@ -38,7 +38,7 @@ route by api...等好處
 ## What is Ingress?
 官方的架構圖  我認為不是很好理解  
 於是我重劃一個 flow chart  
-{{< mermaid >}}  
+```mermaid
 graph LR;
   client([client])
   lb[Ingress-managed <br> load balancer]
@@ -68,7 +68,7 @@ graph LR;
   class ingress,service,pod1,pod2,service_nodeport,service_lb,pod_ic k8s;
   class client,lb plain;
   class cluster cluster;
-{{< /mermaid >}}  
+```
 
 首先 實線的部份 是建議做法  
 虛線則是也可以這樣玩  

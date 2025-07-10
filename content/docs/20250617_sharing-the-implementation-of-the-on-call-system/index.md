@@ -143,24 +143,24 @@ web, app 反應快上不少
   舉例來說 member 輪班 interval 是一週  
   Schedules 會設定為 routing 的狀態  
   
-{{< mermaid >}}  
+```mermaid
 graph LR;  
     A --> B --> C --> D  
     D --> A  
-{{< /mermaid >}}  
+```
 
   而有人請假的話 就可以使用 Overrides 功能  
   而不用修改 Schedule  
 
 - Escalation Policies  
   因為 squadcast 收到 alert 時會有幾個階段  
-{{< mermaid >}}  
+```mermaid
 graph LR;  
     initial[send alert]  
     ack[on-call member acknowledge]  
     resolve[on-call member resolve alert]  
     initial --> ack --> resolve  
-{{< /mermaid >}}  
+```
   
   前面提到 Schedules 我們設定了 primary/backup  
   如果 primary member 沒接到 alert  

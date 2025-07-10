@@ -73,7 +73,7 @@ mise 就是一個 runtime manager
 
 monorepo 架構圖：
   
-{{< mermaid >}}  
+```mermaid
 ---
 title: Workspace
 ---
@@ -90,13 +90,13 @@ flowchart TD
     P1 -- dep --> L1
     P1 -- dep --> L2
     P2 -- dep --> L1
-{{< /mermaid >}}  
+```
 
 ### start a git repo with mise managed runtime
 
 首先利用 mise 管理 uv 及 python 版本
 
-```bash
+```bash {filename="test.test"}
 # query uv version 
 $ mise ls-remote --all | grep uv
 uv@0.7.13

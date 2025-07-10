@@ -28,13 +28,13 @@ CSI 建立空間後就會提供 Persistent Volumes(PV) object, 來讓 pod mount 
 
 簡易關係如下  
 
-{{< mermaid >}}  
+```mermaid
 graph TD
     POD -- 1.建立儲存請求 --> PVC
     CSI -- 2.了解需求 --> PVC
     CSI -- 3.建立儲存 --> PV
     POD -- 4.掛載 --> PV 
-{{< /mermaid >}}  
+```
 
 
 ## CSI  

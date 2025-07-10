@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: k8s doc reading index
+weight: 1
 ---
 ![alt](images/banner.png)  
 

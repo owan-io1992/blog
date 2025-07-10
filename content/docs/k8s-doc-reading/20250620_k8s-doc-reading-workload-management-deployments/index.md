@@ -77,11 +77,11 @@ ReplicaSet 則會建立 pod
 > 基本上我們不會直接使用 ReplicaSet  
 
 關係如下  
-{{< mermaid >}}  
+```mermaid
 flowchart TD
     A[Deployment] -- 控制與管理 --> B(ReplicaSet)
     B -- 建立並維持副本數量 --> C((Pod 1...n))
-{{< /mermaid >}}  
+```
 
 **關於 label**  
 k8s 的 label 是很重要的觀念  
@@ -203,7 +203,7 @@ deployment 會因為 pod 起不來  因此沒有繼續更新
 deployment 會先建立另一個 ReplicaSet  
 並逐步調整兩個 ReplicaSet 的 pod 數量   
 藉此來 rolling upgrade  
-{{< mermaid >}}  
+```mermaid
 graph TD
     A[Deployment] -- 控制與管理 --> B1(ReplicaSet)
     A[Deployment] -- 控制與管理 --> B2(ReplicaSet)
@@ -211,7 +211,7 @@ graph TD
     Pod 1...n-x"))
     B2 -- 建立並維持副本數量 --> C2(("tag 1.16.2 
     Pod 1...x"))
-{{< /mermaid >}}  
+```
 
 這樣也能夠理解 為什麼中間還要再過一層 ReplicaSet 了  
 
