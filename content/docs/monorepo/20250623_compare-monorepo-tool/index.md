@@ -4,6 +4,7 @@ draft: false
 tags:
 - monorepo
 title: "monorepo tool compare bazel & nx & moon"
+weight: 5
 ---
 ![alt](images/banner.jpeg)  
 

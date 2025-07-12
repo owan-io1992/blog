@@ -4,6 +4,7 @@ draft: false
 tags:
 - k3s
 title: k3s introduction
+weight: 1
 ---
 ![alt](images/banner.png)  
 

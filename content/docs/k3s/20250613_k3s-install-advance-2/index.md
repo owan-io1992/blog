@@ -4,6 +4,7 @@ draft: false
 tags:
 - k3s
 title: k3s install advance 2
+weight: 3
 ---
 ![alt](images/banner.png)  
 

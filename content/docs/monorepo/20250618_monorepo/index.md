@@ -4,6 +4,7 @@ draft: false
 tags:
 - monorepo
 title: "Sharing the implement of the monorepo"
+weight: 1
 ---
 ![alt](images/banner.png)  
 

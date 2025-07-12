@@ -63,13 +63,13 @@ enableInlineShortcodes: true
 menu:
   main:
     - identifier: documentation
-      name: Documentation
+      name: docs
       pageRef: /docs
       weight: 1
     # - identifier: versions
     #   name: Versions
     #   weight: 2
-    # - identifier: blog
+    # - identifier: documentation
     #   name: Blog
     #   pageRef: /blog
     #   weight: 3
@@ -85,19 +85,16 @@ menu:
       weight: 6
       params:
         type: search
-    # - name: GitHub
-    #   weight: 7
-    #   url: "https://github.com/imfing/hextra"
-    #   params:
-    #     icon: github
+    - name: GitHub
+      weight: 7
+      url: "https://github.com/orgs/owan-io1992/repositories"
+      params:
+        icon: github
     # - identifier: development
     #   name: Development ↗
     #   url: https://imfing.github.io/hextra/versions/latest/
     #   parent: versions
-    # - identifier: v0.9
-    #   name: v0.9 ↗
-    #   url: https://imfing.github.io/hextra/versions/v0.9/
-    #   parent: versions
+
 
   sidebar:
     - identifier: more
@@ -145,7 +142,7 @@ params:
 
   # Display the last modification date
   displayUpdatedDate: true
-  dateFormat: "2023-10-15"
+  dateFormat: "2006-01-30"
 
   # Search
   # flexsearch is enabled by default

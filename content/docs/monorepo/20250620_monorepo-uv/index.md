@@ -4,6 +4,7 @@ draft: false
 tags:
 - monorepo
 title: "Sharing the implement of the monorepo - uv"
+weight: 3
 ---
 ![alt](images/banner.jpeg)  
 
@@ -96,7 +97,7 @@ flowchart TD
 
 首先利用 mise 管理 uv 及 python 版本
 
-```bash {filename="test.test"}
+```bash
 # query uv version 
 $ mise ls-remote --all | grep uv
 uv@0.7.13

@@ -5,6 +5,7 @@ tags:
 - mise
 - runtime manager
 title: "developer 神器 runtime manager: mise"
+weight: 2
 ---
 ![alt](images/banner.png)  
 
