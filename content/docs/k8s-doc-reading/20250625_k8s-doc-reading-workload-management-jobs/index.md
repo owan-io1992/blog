@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: "k8s doc reading: Concepts - Workload Management - Jobs"
+weight: 11
 ---
 ![alt](images/banner.png)  
 

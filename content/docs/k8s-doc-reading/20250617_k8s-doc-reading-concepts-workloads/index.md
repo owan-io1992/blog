@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: "k8s doc reading: Concepts - workloads"
+weight: 5
 ---
 ![alt](images/banner.png)  
 

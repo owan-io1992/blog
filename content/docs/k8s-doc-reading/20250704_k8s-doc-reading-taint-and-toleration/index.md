@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: "k8s doc reading: Concepts - scheduling-eviction - Taints and Tolerations"
+weight: 27
 ---
 ![alt](images/banner.png)  
 

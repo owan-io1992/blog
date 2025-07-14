@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: "k8s doc reading: Concepts - configuration - configmaps"
+weight: 22
 ---
 ![alt](images/banner.png)  
 

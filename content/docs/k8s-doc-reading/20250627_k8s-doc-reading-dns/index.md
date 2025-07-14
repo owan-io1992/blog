@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: "k8s doc reading: Concepts - Services, Load Balancing, and Networking - dns"
+weight: 19
 ---
 ![alt](images/banner.png)  
 

@@ -94,6 +94,8 @@ k8s 就像大客車概念
 - [Concepts - Scheduling, Preemption and Eviction: Assigning Pods to Nodes](/posts/20250704_k8s-doc-reading-assign_pod_to_node/)
 - [Concepts - Scheduling, Preemption and Eviction: Taints and Tolerations](/posts/20250704_k8s-doc-reading-taint-and-toleration/)
 - [Concepts - Cluster Administration: Node Shutdowns](/posts/20250708_k8s-doc-reading-cluster-administration_node-shutdown/)
+- [Concepts - Objects In Kubernetes](/posts/20250712_k8s-doc-reading-objects-in-kubernetes/)
+
 
 ### intermediate
 - Concepts - Workloads: Autoscaling Workloads

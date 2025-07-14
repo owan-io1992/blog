@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: "k8s doc reading: Concepts - configuration - Liveness, Readiness, and Startup Probes"
+weight: 24
 ---
 ![alt](images/banner.png)  
 

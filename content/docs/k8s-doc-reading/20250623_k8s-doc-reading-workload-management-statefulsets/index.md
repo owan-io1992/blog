@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: "k8s doc reading: Concepts - Workload Management - statefulsets"
+weight: 9
 ---
 ![alt](images/banner.jpeg)  
 

@@ -4,6 +4,7 @@ draft: false
 tags:
 - k8s-reading
 title: "k8s doc reading: Concepts - Storage - Volumes"
+weight: 20
 ---
 ![alt](images/banner.png)  
 

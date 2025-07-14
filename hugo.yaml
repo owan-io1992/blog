@@ -142,8 +142,7 @@ params:
 
   # Display the last modification date
   displayUpdatedDate: true
-  dateFormat: "2006-01-30"
-
+  dateFormat: "2006 Jan 2"
   # Search
   # flexsearch is enabled by default
   search:
