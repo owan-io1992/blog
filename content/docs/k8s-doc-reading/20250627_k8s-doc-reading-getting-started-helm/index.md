@@ -3,7 +3,7 @@ date: 2025-06-27T11:53:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts: Getting started - helm"
+title: "Concepts: Getting started - helm"
 weight: 7
 ---
 ![alt](images/banner.png)  

@@ -3,7 +3,7 @@ date: 2025-06-16T09:33:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts: Cluster Architecture"
+title: "Cluster Architecture"
 weight: 3
 ---
 ![alt](images/banner.png)  

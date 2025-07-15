@@ -3,7 +3,7 @@ date: 2025-07-04T01:09:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - configuration - Liveness, Readiness, and Startup Probes"
+title: "Concepts - configuration - Liveness, Readiness, and Startup Probes"
 weight: 24
 ---
 ![alt](images/banner.png)  

@@ -3,7 +3,7 @@ date: 2025-07-03T07:30:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - configuration - secret"
+title: "Concepts - configuration - secret"
 weight: 23
 ---
 ![alt](images/banner.png)  

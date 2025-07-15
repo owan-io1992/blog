@@ -3,7 +3,7 @@ date: 2025-06-27T03:47:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Services, Load Balancing, and Networking - ingress"
+title: "Concepts - Services, Load Balancing, and Networking - ingress"
 weight: 16
 ---
 ![alt](images/banner.png)  

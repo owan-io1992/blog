@@ -3,7 +3,7 @@ date: 2025-06-18T08:44:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts: Getting started"
+title: "Concepts: Getting started"
 weight: 6
 ---
 ![alt](images/banner.png)  

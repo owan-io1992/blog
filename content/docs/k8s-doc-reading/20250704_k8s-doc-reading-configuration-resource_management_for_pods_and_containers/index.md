@@ -3,7 +3,7 @@ date: 2025-07-04T03:09:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - configuration - Resource Management for Pods and Containers"
+title: "Concepts - configuration - Resource Management for Pods and Containers"
 weight: 25
 ---
 ![alt](images/banner.png)  

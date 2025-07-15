@@ -3,7 +3,7 @@ date: 2025-06-29T08:53:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Services, Load Balancing, and Networking - dns"
+title: "Concepts - Services, Load Balancing, and Networking - dns"
 weight: 19
 ---
 ![alt](images/banner.png)  

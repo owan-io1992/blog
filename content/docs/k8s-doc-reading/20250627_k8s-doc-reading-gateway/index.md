@@ -3,7 +3,7 @@ date: 2025-06-28T05:24:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Services, Load Balancing, and Networking - gateway API"
+title: "Concepts - Services, Load Balancing, and Networking - gateway API"
 weight: 17
 ---
 ![alt](images/banner.png)  

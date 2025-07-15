@@ -3,7 +3,7 @@ date: 2025-07-03T00:25:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Storage - Volumes - Storage"
+title: "Concepts - Storage - Volumes - Storage"
 weight: 21
 ---
 ![alt](images/banner.png)  

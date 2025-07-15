@@ -3,7 +3,7 @@ date: 2025-06-25T06:29:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Workload - Autoscaling Workloads"
+title: "Concepts - Workload - Autoscaling Workloads"
 weight: 13
 ---
 ![alt](images/banner.png)  

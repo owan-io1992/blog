@@ -3,7 +3,7 @@ date: 2025-06-16T05:54:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Overview"
+title: "Concepts - Overview"
 weight: 2
 ---
 ![alt](images/banner.png)  

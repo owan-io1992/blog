@@ -3,7 +3,7 @@ date: 2025-06-20T10:46:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Workload Management - deployments"
+title: "Concepts - Workload Management - deployments"
 weight: 8
 ---
 ![alt](images/banner.jpeg)  

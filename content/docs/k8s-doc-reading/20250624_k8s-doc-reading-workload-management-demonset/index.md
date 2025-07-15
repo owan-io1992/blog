@@ -3,7 +3,7 @@ date: 2025-06-24T06:24:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Workload Management - daemonset"
+title: "Concepts - Workload Management - daemonset"
 weight: 10
 ---
 ![alt](images/banner.png)  

@@ -3,7 +3,7 @@ date: 2025-07-08T06:06:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - objects in kubernetes"
+title: "Concepts - objects in kubernetes"
 weight: 29
 ---
 ![alt](images/banner.png)  

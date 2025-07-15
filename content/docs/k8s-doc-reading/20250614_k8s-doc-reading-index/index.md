@@ -3,7 +3,7 @@ date: 2025-06-14T12:57:00
 draft: false
 tags:
 - k8s-reading
-title: k8s doc reading index
+title: index
 weight: 1
 ---
 ![alt](images/banner.png)  

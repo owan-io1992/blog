@@ -3,7 +3,7 @@ date: 2025-06-17T08:26:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - workloads"
+title: "Concepts - workloads"
 weight: 5
 ---
 ![alt](images/banner.png)  

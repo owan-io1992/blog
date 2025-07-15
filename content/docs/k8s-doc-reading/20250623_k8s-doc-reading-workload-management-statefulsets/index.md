@@ -3,7 +3,7 @@ date: 2025-06-23T06:17:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - Workload Management - statefulsets"
+title: "Concepts - Workload Management - statefulsets"
 weight: 9
 ---
 ![alt](images/banner.jpeg)  

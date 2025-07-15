@@ -3,7 +3,7 @@ date: 2025-07-04T03:09:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - configuration - Assigning Pods to Nodes"
+title: "Concepts - configuration - Assigning Pods to Nodes"
 weight: 26
 ---
 ![alt](images/banner.png)  

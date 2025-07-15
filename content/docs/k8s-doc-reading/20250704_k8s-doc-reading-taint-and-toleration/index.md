@@ -3,7 +3,7 @@ date: 2025-07-04T13:32:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - scheduling-eviction - Taints and Tolerations"
+title: "Concepts - scheduling-eviction - Taints and Tolerations"
 weight: 27
 ---
 ![alt](images/banner.png)  
