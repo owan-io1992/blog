@@ -40,7 +40,7 @@ This command generates static content into the `build` directory and can be serv
 
 ```
 give me 'The Terminator' style 
-about terminate k8s Node
-with text:Cluster Administration - Node Shutdowns
+about objects in kubernetes
+with text:objects in kubernetes
 ```
 

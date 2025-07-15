@@ -201,3 +201,17 @@ annotation(註解) 用於上加非辨識用 data
 
 因此有趣的是 annotation 更多時候不只是 annotation  
 可以看成最簡易的 api 的擴充方式  
+
+## manage manifest  
+我們在使用 k8s 時會建立許多 object 比如 ingress,deployment,service...etc  
+要管理這麼多的 object 借助工具會好的多  
+
+k8s 官方提供了 kustomize 這個 tool 幫忙管理眾多的 manifest    
+類似的 tool 還有 helm  
+那以經驗來說 helm 功能強大不少  
+且基本上已成為標準, 大家都會優先支援 helm  
+因此建議直接學習 helm 來管理 manifest   
+
+> [!TIP]
+> 有另一個 [nelm](https://github.com/werf/nelm) project 要取代 helm  
+> 但目前 argoCD 尚未支援, 不過以長期來看 nelm 具有一定潛力  
