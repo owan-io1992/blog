@@ -3,7 +3,7 @@ date: 2025-07-03T00:25:00
 draft: false
 tags:
 - k8s-reading
-title: "k8s doc reading: Concepts - configuration - configmaps"
+title: "Concepts - configuration - configmaps"
 weight: 22
 ---
 ![alt](images/banner.png)  
