@@ -25,7 +25,7 @@ To modernize the development workflow and CI/CD pipeline by migrating 10 project
 ## Solutions (After):
 
 * Monorepo (moonrepo): 
-  * project structure 一致, 可以有效減少 project 維護難度
+  * consistency project structure to simple management
   * use moonrepo Centralized services with intelligent caching to significantly reduce CI build times.
 * Standardized Dev Environment:
   * devcontainer: for consistent, one-click development environments.
