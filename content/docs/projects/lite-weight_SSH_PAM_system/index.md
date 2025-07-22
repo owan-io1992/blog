@@ -5,6 +5,7 @@ tags:
 - projects
 title: "lite-weight SSH PAM system"
 ---
+![](images/banner.png)
 
 <!--more-->
 use vibe coding develop a lite-weight SSH PAM system
