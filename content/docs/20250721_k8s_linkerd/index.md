@@ -26,3 +26,12 @@ linkerd install --crds | kubectl apply -f -
 linkerd install | kubectl apply -f -
 ```
 
+... 略
+
+
+# teardown
+```bash
+linkerd viz uninstall | kubectl delete -f -
+linkerd uninstall | kubectl delete -f -
+
+```

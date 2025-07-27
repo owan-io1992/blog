@@ -2,7 +2,7 @@
 date: 2025-07-21T02:48:00  
 draft: false
 tags: []
-title: "introduction istio Ambient Mode"
+title: "introduction istio sidecar Mode"
 ---
 
 <!--more-->
@@ -10,21 +10,26 @@ title: "introduction istio Ambient Mode"
 https://istio.io/latest/docs/
 
 ## install
+https://istio.io/latest/docs/setup/getting-started/
+
 ```bash
 # install cli
 mise use -g istioctl@1.26.2
 
 
 # install gateway api
-kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
-  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+#kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
+#  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
 
 # pre check
 istioctl version
 
 # install istio
-istioctl install --set profile=ambient --skip-confirmation
+istioctl install -f samples/bookinfo/demo-profile-no-gateways.yaml -y
 ```
+
+
+
 
 # Deploy a sample application
 https://istio.io/latest/docs/ambient/getting-started/deploy-sample-app/
@@ -55,11 +60,4 @@ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.26/samp
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.26/samples/addons/kiali.yaml
 ```
 
-
-
-
-# issue 
-
-for cilium with kube-proxy replace, need change config 
-https://docs.cilium.io/en/stable/network/servicemesh/istio/#gsg-istio
-
+??? fail for waypoint 
