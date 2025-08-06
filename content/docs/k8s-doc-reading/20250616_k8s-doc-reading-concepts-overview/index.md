@@ -29,7 +29,7 @@ weight: 2
 ## what Kubernetes provides
 ### Service discovery and load balancing: 
 在 docker 中, 很容易遇到的挑戰是 container 跟 container 之間如何溝通  
-在一對一中 你要首先知道如何找到對方  
+在一對一中 你首先要知道如何找到對方  
 在多對多中(replica) 你還要知道怎們進行 loadbalance(負載平衡)  
 因此一般在 docker 中你會需要借助外部的 loadbalancer 去完成
 在 k8s cluster 中 則是提供了 DNS name 的方式讓 container 能夠輕易找到對方的 endpoint(位置)  
@@ -93,16 +93,16 @@ Kubernetes is not monolithic, and these default solutions are optional and plugg
 k8s 是模組化設計  
 有些東西你不喜歡官方預設選項的話  你是可以更換的 比如 kube-proxy  
 還有個重點  
-k8s 有些東西只有提供支援  但並沒有實際 implement(比如說 ingress)  
+k8s 有些東西只有提供支援  但並沒有實做(implement), 比如說 ingress  
 舉例來說  
 政府蓋了國道1號  任何人都可以上路  
-但你必須自備汽車  
+但你必須自備汽車才行  
 
 這是 k8s 很特別的點 也是很容易讓人感到困惑的點  
 
 ---
 
-一樣先貼原文, 再以中文解釋  
+以下一樣先貼原文, 再以中文解釋  
 
 ### Does not limit the types of applications supported. 
 k8s 並沒有限制你可以跑什麼樣的東西  
