@@ -3,11 +3,11 @@ date: 2025-06-16T09:33:00
 draft: false
 tags:
 - k8s-reading
-title: "Cluster Architecture"
+title: "Concepts - Cluster Architecture"
 weight: 3
 ---
 ![alt](images/banner.png)  
-
+concepts-cluster-architecture
 <!--more-->
 
 [doc link](https://kubernetes.io/docs/concepts/overview/components/)  
@@ -27,7 +27,7 @@ weight: 3
 
 
 ## component 介紹
-以下我認為大概知道即可  
+以下我認為大概知道概念即可  
 除了在 debug cluster issue 外  
 一般在操作其實不太會碰到  
 
@@ -45,10 +45,12 @@ API server 是負責 component /operator 之間溝通的橋樑
 我們實際在使用 k8s 時, 會告訴他我們的期望執行 container 的條件  
 比如說 cpu/memory 需要多少, 該執行在什麼 cpu architecture 上, 甚至是 node type (有無 GPU 之類的)   
 
-scheduler 負責根據我們的設定 編排 container 在符合條件的 work node 上執行   
+scheduler 負責根據我們的設定, 編排 container 在符合條件的 work node 上執行   
 
 
 ### kube-controller-manager
+先貼原文  
+
 Control plane component that runs controller processes.
 
 Logically, each controller is a separate process, but to reduce complexity, they are all compiled into a single binary and run in a single process.
@@ -68,8 +70,9 @@ The above is not an exhaustive list.
 這是 option component  
 除非你有用 cloud provider (公有雲/私有雲)  
 才有這 component,  但基本上 cloud provider 舉例 EKS  
-不會讓你接觸到 control-plane  
-所以也不用太過了解 care  
+不會讓你接觸到 control-plane, 這些元件也會幫你安裝完成  
+他的用途就是跟 cloud 其他服務互動用  
+也是知道即可  
 
 ### kubelet
 簡單來說，kubelet 是每個 work node 上的主要代理程式。它負責確保 Pod 中的容器正常運行。  
@@ -80,8 +83,8 @@ kube-proxy 負責處理 Service 的網路代理，它會根據 Service 的定義
 
 
 ### Container runtime 
-就是負責執行的 container 的 component   
-基本上建議使用 containerd  
+就是負責執行的 container 的 component  
+個人建議使用 containerd  
 
 ## Addons
 提供 cluster features 
