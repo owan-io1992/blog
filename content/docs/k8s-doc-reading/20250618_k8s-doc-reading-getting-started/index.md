@@ -29,10 +29,11 @@ weight: 6
 順利安裝少說半小時起跳  
 因為步驟很多, 出錯機會也非常大 因此非常不建議使用  
 
-因此官方的 getting start 也不是採用原生 k8s  
-是使用 kind or minikube (挨 不是... getting start 你幹麻讓人選擇障礙啊啊啊)  
-但兩套我都不建議使用  
-請跟我一樣使用 k3s  
+官方的 getting start 也不是採用原生 k8s  
+是使用 kind or minikube (唉 不是... getting start 你幹麻讓人選擇障礙啊啊啊)  
+但兩套我都不建議使用, 由於其 base 在 docker 環境底下  
+導致其部份功能會受到 docker 限制, 造成學習 k8s 會有限制  
+因此建議跟我一樣使用 k3s  
 detail 可見 [k3s introduction](/posts/20250612_k3s-introduction/)  
 
 ## install k3s
@@ -65,7 +66,8 @@ node1   Ready    control-plane,master   112s   v1.32.5+k3s1
 ```
 
 說明一下  
-前面有說過  不同 distribution add node 方式不同  
+前面有說過  
+不同 distribution add node 方式不同  
 因此前面(k8s doc reading: Concepts - Cluster Architecture: Node) 有說簡單了解即可  
 另外採用 k3s 我們也不會用到 `kubeadm`  
 所以這篇會跟官方的 getting start 有差異  
@@ -80,13 +82,13 @@ node1   Ready    control-plane,master   112s   v1.32.5+k3s1
 畢竟這樣方便許多  
 許多人都是這樣使用 k8s  
 為了讓大家都能看懂別人在說什麼
-因此 `k` 就是指 `kubectl` 是基本常識喔   
+因此 `k` 就是指 `kubectl` 是基本常識   
 
 ## deploy first app
 
 首先回憶 k8s 是採用 declarative configuration  
 也就是說 我們都是寫 config(yaml format) 給 k8s 看  
-對等就是 docker compose file 啦  
+對等就是 docker compose file    
 
 現在我們直接使用現成的 yaml 來部屬第一個 app 
 

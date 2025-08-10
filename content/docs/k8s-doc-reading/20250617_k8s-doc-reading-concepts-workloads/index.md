@@ -24,7 +24,7 @@ pod 該如何設計？
 因為 k8s 在 scale 的時候  是以 pod 為單位  
 通常 APP,DB loading 不會是對等的, 所以不會同時 scale  
 另外一個原因 是因為 APP 通常是 stateless  
-DB 是 stateful  
+DB 是 stateful, 在 scale 時需要考慮更多(比如說 data)  
 
 - stateless: replica, pod restart(or upgrade...etc) 之間不存在任何關係, 大家都是做一樣的事情,並獨立運作的個體  
 - stateful: 就是與 stateless 相反  
@@ -40,18 +40,19 @@ DB 是 stateful
 
 k8s 有另外的 workload resources 來 maintain pod lifecycle  
 比如說 pod 該有多少 replica / 該住在哪些 work node 上  
-如果 node 死了, 要怎麼維持執行中的 pod 數量符合預期  
+如果 node 死了, workload resources 會維持執行中的 pod 數量符合預期  
 
 因此雖然 k8s 最小部屬單位是 pod  
 但通常我們並不直接建立 pod  
 而是使用 workload resources 間接建立  
 
-workload resources 如果發現因為 node 死掉  
+workload resources 如果發現因為 node 死掉 or 其他原因 
 pod 數量不符合預期  
 就會請 scheduler schedule 新的 pod  
 來維持高可用性  
 
 ### k8s build-in workload resources
+以下介紹 k8s 支援的 workload resources  
 
 Deployment: good fit for managing a stateless application workload  
 

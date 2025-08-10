@@ -246,4 +246,4 @@ kubectl delete <node name>
 
 ---
 
-以上稍微介紹 node  基本概念  
+以上稍微介紹 node 基本管理知識
