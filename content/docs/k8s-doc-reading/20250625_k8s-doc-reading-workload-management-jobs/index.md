@@ -13,9 +13,9 @@ weight: 11
 
 job 提供一次行的工作  
 同時也確保 pod 必須成功結束(successfully complete)  
-否則 k8s 就會一直重複執行  
+否則 k8s 就會重新執行  
 
-直接來看 sample 
+直接來看 sample  
 
 ```bash
 apiVersion: batch/v1
@@ -87,3 +87,7 @@ detail 可見 [Success policy](https://kubernetes.io/docs/concepts/workloads/con
 ## cleanup 
 job default 必須手動刪除  
 可以加上 `.spec.ttlSecondsAfterFinished` 來自動刪除  
+
+---
+以上就是 job 介紹  
+大多情況是使用 cronjob, 下章會介紹

@@ -12,9 +12,8 @@ weight: 10
 [doc link](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)   
 
 
-daemonset 用途在每個指定的 node 上都啟動的 pod     
+daemonset 用途在每個指定的 node 上都啟動同樣 pod  
 
-他會確保所有(或部份) 都執行該 pod
 
 參考用途: 
 - running a cluster storage daemon on every node  
@@ -22,11 +21,9 @@ daemonset 用途在每個指定的 node 上都啟動的 pod
 - running a node monitoring daemon on every node  
 
 簡單來說
-daemonset 用來啟動 node 所需要的基本 pod  
+daemonset 用來啟動 node 所需要的基本工具 monitor or collector (as pod)  
 因此 node 安裝 k8s 後, 剩下所需要的 daemon 就可以交給 k8s 執行  
-比如說 monitor tool  
-
-
+不須再透過 systemd 來執行  
 ## sample daemonset
 
 ```bash
@@ -110,5 +107,5 @@ tolerations(容忍) 就讓 scheduler 忽略 node 身上的 Taints
 其餘部份都與 deployment 相差無異  
 
 而前面有提到可以全部或部份 node 執行 daemonset  
-這邊之後會再提到可以用 nodeSelector or nodeAffinity 來達成   
+可以用 nodeSelector or nodeAffinity 來達成  
 

@@ -2,7 +2,7 @@
 
 This website is built using [hugo](https://gohugo.io), Hugo is one of the most popular open-source static site generators. With its amazing speed and flexibility, Hugo makes building websites fun again.  
 
-theme source [hextra](https://imfing.github.io/hextra/  
+theme source [hextra](https://imfing.github.io/hextra/)
 
 ## Installation
 

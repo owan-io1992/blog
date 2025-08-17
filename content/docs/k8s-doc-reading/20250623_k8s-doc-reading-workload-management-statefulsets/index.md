@@ -14,7 +14,11 @@ weight: 9
 如果在前面的 deployment 應該會發現  
 pod name 會有一串 random id  
 statefulset 則是會讓 pod 有固定名稱(固定的 hostname)  
-pod 所 mount volume 也會是跟著固定的  
+
+通常來說 deployment 如果有 mount volume, 會是所有 replica mount 同一 volume
+statefulset 則是能讓每個 pod mount 各自的 volume 
+after restart 也是 mount 固定 volume  
+因此可以達成 'stateful'  
 
 statefulset 適用在以下需求  
 - Stable, unique network identifiers.  

@@ -31,9 +31,9 @@ k8s 是一個 cluster
 那就沒有 auto scale node 的功能了 (畢竟要先有硬體)  
 
 可是如果你是使用 EKS(amazon),GKE(google),AKS(azure)  
-因為是公有雲環境, 要多少 computing resource 就是 api 要馬上有  
-因此能提供 cluster auto scale  
-根據不同的 distro  
+因為是公有雲環境, 要多少 computing resource 就是 api call 下去馬上有  
+因此能提供 cluster auto scale 功能  
+根據不同的公有雲  
 有不同得做法  
 不過基本上 [kubernetes/autoscaler](https://github.com/kubernetes/autoscaler) 都支援   
 
@@ -60,7 +60,7 @@ k8s 內建有兩種 scale
 在 k8s 進行 Vertical scaling 稱為 VerticalPodAutoscaler (VPA)  
 
 HPA 是 k8s 直接支援  
-VPA 則是需要另外安裝  
+VPA 則是需要另外安裝 CRD  
 兩個都是依靠 pod cpu/mem 的 metric 作為判斷條件  
 而 k8s defaule 沒有提供 pod cpu/mem 的 metric(what...?)  
 
@@ -70,15 +70,16 @@ k8s 支援但沒有 implement feature, 這種情況在 k8s 中很常發生
 
 那關於 pod cpu/mem 的 metric  
 需要安裝 [metrics-server](https://github.com/kubernetes-sigs/metrics-server)  才能支援  
-k3s 預設已經安裝 metrics-server  
+k3s 預設已經安裝 metrics-server 了, 因此可以直接使用  
 
 for 其他 distro 可能須自行安裝    
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ```
 
-關於 pod auto scale 其實 k8s 內建的 Autoscaler 功能有限  
-也並沒那麼好用  
+關於 pod auto scale  
+其實 k8s 內建的 Autoscaler trigger 條件有限  
+導致並沒那麼好用  
 k8s 官方推薦使用 [KEDA](https://keda.sh)  
 我個人也非常推薦使用 KEDA  
 因此 HPA/VPA 大家稍微了解即可  
@@ -127,7 +128,7 @@ https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resour
 ---  
 
 最後關於 KEDA  
-之後再找個篇幅說明  
+之後有機會再找個篇幅說明  
 
 如果是在公有雲的環境下  
 pod 一 scale, node 有需要也會 scale  
