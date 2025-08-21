@@ -12,7 +12,7 @@ weight: 18
 [doc link](https://kubernetes.io/docs/concepts/services-networking/network-policies/)  
 
 k8s default 情況下 pod 跟 pod 之間可以任意存取  
-如果是在忽安全性的組織就必須加以管控  
+如果是在乎安全性的組織就必須加以管控  
 
 networkploicy 可以做到  
 - pod 隔離  
@@ -136,4 +136,4 @@ network ploicy 因為是透過 CNI implement
 
 對於 k8s 的 network policy 他只能做基本的 tcp/ip 防護  
 如果要更進階例如 7 層的防護  
-必須使用其他 solution  
+必須使用其他 solution, 比如說採用 service mesh  

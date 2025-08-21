@@ -12,22 +12,21 @@ weight: 16
 [doc link](https://kubernetes.io/docs/concepts/services-networking/ingress/)   
 
 ingress 簡單來說就是 reverse proxy  
-他只能處理 http/https 的 protocol  
+他只能處理 http/https 的 protocol, 不過部份 ingress controller 有辦法另外支援 tcp/udp    
 為了提昇相容性, k8s 另外新增了 gateway API(下一篇會提到) 來支援 tcp/udp  
 
-因為 gateway API 就是下一代的 ingress 基本能完全取代 ingress  
-不過從官方介紹來看  
+至於 gateway API 是否會取代 ingress??  
+從官方介紹來看  
 ingress 沒有 deprecate 的打算  
 https://gateway-api.sigs.k8s.io/faq/#will-gateway-api-replace-the-ingress-api  
 
-
-因為 k8s 沒有 implement ingress, 能不能轉換到 gateway API 必須看 implement 的 project 有沒有辦法支援   
+另外 k8s 沒有 implement ingress, 能不能轉換到 gateway API 必須看 implement 的 project 有沒有辦法支援   
 而 gateway API 也是, k8s 並沒有 implement  
-因此種種原因並不會 deprecate ingress  
+因次在使用上也請注意要先安裝 controller 後才能使用  
 
 那到底還要不要學 ingress 呢？  
-目前來說學 ingress 不虧, 有由淺入深的感覺  
-另外因為 k8s 沒有 implement ingress  
+目前來說學 ingress 不虧, 他還是有他的好處  
+有由淺入深的感覺  
 
 ## why ingress ?  
 ingress 帶來一些好處  
