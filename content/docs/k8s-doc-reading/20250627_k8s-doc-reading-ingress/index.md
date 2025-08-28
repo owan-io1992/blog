@@ -9,35 +9,31 @@ weight: 16
 ![alt](images/banner.png)  
 
 <!--more-->
-[doc link](https://kubernetes.io/docs/concepts/services-networking/ingress/)   
+[doc link](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 
-ingress 簡單來說就是 reverse proxy  
-他只能處理 http/https 的 protocol, 不過部份 ingress controller 有辦法另外支援 tcp/udp    
-為了提昇相容性, k8s 另外新增了 gateway API(下一篇會提到) 來支援 tcp/udp  
+## 什麼是 Ingress？
 
-至於 gateway API 是否會取代 ingress??  
-從官方介紹來看  
-ingress 沒有 deprecate 的打算  
-https://gateway-api.sigs.k8s.io/faq/#will-gateway-api-replace-the-ingress-api  
+簡單來說，**Ingress** 是 Kubernetes (K8s) 中管理外部流量進入叢集的 API 物件，其作用類似於一個「智慧型反向代理 (Reverse Proxy)」。它主要負責處理 HTTP 和 HTTPS 流量，並提供以下關鍵功能：
 
-另外 k8s 沒有 implement ingress, 能不能轉換到 gateway API 必須看 implement 的 project 有沒有辦法支援   
-而 gateway API 也是, k8s 並沒有 implement  
-因次在使用上也請注意要先安裝 controller 後才能使用  
+- **SSL/TLS 終止 (Termination)**：集中管理憑證，卸載後端服務的加密負擔。
+- **基於主機名和路徑的路由 (Host and Path-based Routing)**：根據請求的網域名稱 (e.g., `foo.com`, `bar.com`) 或 URL 路徑 (e.g., `/api`, `/images`) 將流量轉發到不同的後端服務。
 
-那到底還要不要學 ingress 呢？  
-目前來說學 ingress 不虧, 他還是有他的好處  
-有由淺入深的感覺  
+Ingress 是目前將 K8s 服務暴露給外部最推薦、也最常見的方式。
 
-## why ingress ?  
-ingress 帶來一些好處  
-比如說 SSL terminal  
-route by api...等好處  
+### Ingress 與 Gateway API
 
-是我目前個人最推薦讓 k8s 對外提供存取的方式  
+您可能聽過一個更新的 API 叫做 [Gateway API](https://gateway-api.sigs.k8s.io/)。它旨在提供比 Ingress 更強大、更具表達力的路由功能，並原生支援 TCP/UDP 等非 HTTP 流量。
 
-## What is Ingress?
-官方的架構圖  我認為不是很好理解  
-於是我重劃一個 flow chart  
+根據官方說明，Gateway API 未來會成為 K8s 路由功能的演進方向，但 **Ingress 並沒有被棄用 (deprecate) 的打算**。考量到 Ingress 的成熟度和廣泛應用，在現階段學習它依然非常重要且實用。
+
+## Ingress 如何運作？
+
+要理解 Ingress，最重要的一點是：**Ingress 本身只是一個設定檔 (Configuration)，它不處理任何流量。**
+
+真正負責讀取 Ingress 設定並處理流量的是 **Ingress Controller**。
+
+以下是流量處理的簡化流程圖：
+
 ```mermaid
 graph LR;
   client([client])
@@ -70,80 +66,36 @@ graph LR;
   class cluster cluster;
 ```
 
-首先 實線的部份 是建議做法  
-虛線則是也可以這樣玩  
+運作流程解析：
+1.  **安裝 Ingress Controller**：由於 K8s 本身不提供 Ingress 的實作，您必須先在叢集中安裝一個 Ingress Controller。它會以 Pod 的形式運行。
+2.  **建立 Ingress 物件**：您需要建立一個 Ingress 的 YAML 設定檔，定義路由規則，例如：「當請求 `foo.bar.com/bar` 時，將流量轉發到 `service1`」。
+3.  **Controller 讀取設定**：Ingress Controller 會持續監聽叢集中的 Ingress 物件。當它發現您建立的 Ingress 物件後，就會讀取其中的規則，並更新自身的代理設定。
+4.  **流量進入**：外部客戶端的請求首先會到達一個負載平衡器 (Load Balancer)，這個負載平衡器將流量導向叢集中的 Ingress Controller Pod。
+5.  **轉發至後端**：Ingress Controller 根據讀取到的規則，將請求轉發到對應的後端 Service，最終到達目標 Pod。
 
-**首先先看實線部份**  
-前面說 k8s 並沒有 implement ingress  
-於是能用之前要先安裝 ingress controller, 也就是實際 implement ingress 功能的 'pod'  
-是的 ingress controller 會以 pod 形式存在於 k8s 中  
-他會向 k8s 宣告一個 ingress class  
-我們在新增 ingress 時會指向一個 ingress class  
-這樣 k8s 就知道該 ingress 實際由哪個 ingress controller 處理  
-換句話說 k8s 中能安裝多個 ingress controller  
+**重點提醒**：所有外部流量都由 Ingress Controller Pod 處理。如果您的網站流量很大，請務必監控 Ingress Controller 的負載，並在必要時對其進行水平擴展 (scale-out)。
 
-而 ingress 由哪個 ingress controller 處理, 這句話的意思是  
-ingress 本身就只是一個 config, 他不具有任何 computing 能力(無法實際處理 request)  
-ingress controller 會 read ingress 後知道該怎麼處理 request  
-所以實際在處理 request 是 "ingress controller"  
+## 如何開始使用 Ingress？
 
-所以! 所以! 所以!  
-client 發起的 request 要能夠進到 cluster 內  
-是要將 request 送給 ingress controller  
-於是外面的 request 量很大的話! 記得也要關心 ingress controller loading  
-不夠的話請記得 scale-out ingress controller  
+### 1. 安裝 Ingress Controller
 
-再來 ingress controller 如何 forward request to pod  
-基本上 ingress controller 為了能夠做更細部的控制  
-比如說 loadbalance mode (leastconn,roundrobin,random...)  
-大部分的 ingress controller 不會再透過 service forward request  
-而是直接知道有哪些 pod 可以送 request, 並直接送給 pod  
+K8s 官方維護了一個可用 [Ingress Controller 的列表](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)。對於初學者，推薦使用由 K8s 社群維護的 [ingress-nginx](https://github.com/kubernetes/ingress-nginx)。
 
+> **注意**：市面上有兩個著名的 NGINX Ingress Controller：一個是 K8s 社群維護的 `ingress-nginx`，另一個是由 F5/NGINX 官方維護的 `nginx-ingress-controller`。兩者在功能和使用上有所差異，安裝時請特別注意。
 
-**虛線部份**  
+每個 Ingress Controller 的安裝方式都不同，請務必參考其官方文件。如果您使用的是像 **k3s** 這樣的輕量級發行版，它通常會預設安裝好 [Traefik](https://traefik.io/traefik/) 作為 Ingress Controller，讓您可以直接開始使用。
 
-在說明完實線後  
-虛線的部份就可以輕易理解了  
-基本上只要目的能夠達成  
-怎麼做都可以
+### 2. 建立 Ingress 物件
 
-client 部份可以透過 NodePort or host network or host port 達成
-host network and host port 可以直接理解為 docker 的 host network 跟 port forward  
-兩者都是直接在 pod 開啟對外 access  
-這些做法在 on-primes 很好用 可以直接省下一個 loadbalance  
+以下是一個基本的 Ingress 設定範例：
 
-另外根據情況 ingress controller 可以將 request 送給 service  
-不過當然會喪失 loadbalance mode 能力... etc  
- 
-## install ingress controller 
-
-k8s 官網有列出可用的 [ingress-controllers](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)  
-當然是包含但不限於了  
-
-如果是初學者 可以安裝 k8s 維護的 [ingress-nginx](https://github.com/kubernetes/ingress-nginx/blob/main/README.md#readme)  
-
-要注意的是 ingress-controllers 清單上面你會看到兩個 nginx  
-ingress-nginx 是 k8s 維護  
-nginx-ingress-controller 則是由 F5 官方維護  
-功能/使用上會有差異  
-
-而不只 nginx 會鬧雙胞胎, haproxy 也是  
-因此在使用上需要特別注意  
-
-而每一家 ingress controller 安裝方式會不同, 必須去看他們的 doc 才行  
-
-但如果我們使用 k3s 的話  
-default 已經幫忙安裝 treafik ingress controller  
-可以直接開始使用  
-
-## sample config 
-
-```bash
+```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-foo-bar
 spec:
+  # ingressClassName: traefik  # 指定要使用的 Ingress Controller
   rules:
   - host: "foo.bar.com"
     http:
@@ -157,48 +109,43 @@ spec:
               number: 80
 ```
 
-快速說明下
-.spec.rules[0].host: 指定收到該 host 的 request 才套用此 ingress 
-.spec.rules[0].path: 可以指定 uri forward 給對應的 service 的 pod   
-通常來說 ingress controller 會將 request 直接送給 pod  
+-   `.spec.rules[0].host`: 定義主機名稱。只有當請求的 `Host` 標頭為 `foo.bar.com` 時，此規則才會生效。
+-   `.spec.rules[0].http.paths[0]`: 定義路徑規則。這裡表示所有以 `/bar` 為前綴的請求，都會被轉發到後端名為 `service1` 的 Service。
 
-## getting start with helm 
-接來我們安裝一個 httpbin server 並使用 ingress 來 expose  
+### 3. 實作：透過 Ingress 暴露服務
+
+讓我們用 [Helm](https://helm.sh/) 來安裝一個 `httpbin` 服務，並透過 Ingress 將其暴露出來。
 
 ```bash
+# 加入 Helm Chart 倉庫
 helm repo add owan-charts https://owan-io1992.github.io/helm-charts/
 helm repo update
 
+# 使用 Helm 安裝 httpbin，並啟用 ingress
+# 假設我們使用的是 k3s 預設的 traefik ingress controller
 helm upgrade --install my-httpbin owan-charts/httpbin --version 0.1.6 \
   --set ingress.enabled=true \
-  --set ingress.className=traefik
+  --set ingress.className=traefik \
+  --set ingress.hosts[0].host=chart-example.local
 ```
 
-test
+安裝完成後，可以查看 Ingress 物件的狀態：
 ```bash
-node_ip=<your k8s node ip>
-curl http://chart-example.local --resolve chart-example.local:80:${node_ip}
-```
-
-來看看 ingress object  
-```bash
-$ k get ingress
+$ kubectl get ingress
 NAME         CLASS     HOSTS                 ADDRESS          PORTS   AGE
 my-httpbin   traefik   chart-example.local   192.168.56.101   80      4m49s
 ```
 
-可以看到有個 object 'my-httpbin' 使用 ingress class 'traefik' 並 forward host 為 chart-example.local 的 request  
-至於 ADDRESS 跟 PORTS 的部份參考即可, k8s 不會列出全部    
-這邊因為 k3s 會 listen 所有 node 的 80,443 port 給 traefik  
-所以 request 送給任一 node 的 80,443 都行  
+現在，您可以透過 `curl` 來測試服務是否成功暴露：
+```bash
+# 將 <your-k8s-node-ip> 替換為您任何一個 K8s 節點的 IP
+node_ip=<your-k8s-node-ip>
 
-想看看 yaml 怎麼寫的  
-可以用 `k get ingress my-httpbin -o yaml`  
+# 使用 --resolve 參數來模擬 DNS 解析
+curl http://chart-example.local/get --resolve chart-example.local:80:${node_ip}
+```
+如果一切順利，您應該會看到 `httpbin` 服務回傳的 JSON 結果。
 
 ---
 
-以上就是 ingress 的快速設定  
-事實上 ingress 能做的事情很多  
-比如說 loadbalance mode  
-ssl terminal  
-因此是很常見的 expose service 的方法  
+以上就是 Ingress 的基本介紹和快速入門。事實上，Ingress 的功能遠不止於此，它還支援更複雜的路由、重寫、身份驗證等高級功能，是 K8s 中不可或缺的重要組件。

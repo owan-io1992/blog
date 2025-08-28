@@ -7,175 +7,90 @@ tags:
 title: Introduction kubernetes
 weight: 1
 ---
-![alt](images/banner.png)  
+![alt](images/banner.png)
 
 <!--more-->
 
-## Introduction
-Kubernetes（常簡稱為K8s）是一個容器編排 (orchestration) 平台  
-誕生於 google  
-由於其本身就是設計給大型環境使用, 其功能非常多樣  
-但也因此導致要上手屬實不容易  
-而也許又出自 google 的手上, 其 doc 還真不是普通的難懂  
-本系列的誕生有幾個目的  
-* 為了能讓自己能夠掌握大部分功能:  
-  等於逼自己學習   
+## 前言：為什麼要讀官方文件？
 
-* 且培養閱讀 official doc 能力:  
-  k8s 功能非常多, 坊間書籍可能不會包含所有功能   
-  且要等到出書, 都不知道是幾個月後的事了  
-  能夠立即了解 new information 是非常重要的  
+Kubernetes (K8s) 已是現代雲原生應用程式的作業系統，也是所有後端工程師的必修課。然而，K8s 功能強大、體系龐雜，加上官方文件的編排方式有時不夠親民，使得許多初學者望而卻步。
 
-* 官方 doc 排序超級鳥:  
-  於果你跟我一樣照著 k8s 官方的排序閱讀  
-  你應該會跟一樣一頭霧腦的  
-  以下順序經過我重新調整過  
-  希望能夠讓讀者們在學習 k8s 時能夠得心應手  
+本系列文章的誕生，旨在解決這個痛點。我們將會：
+1.  **重新編排學習路徑**：打破官方文件的章節限制，按照由淺入深的認知順序，重新組織學習主題。
+2.  **提煉核心概念**：將晦澀的原文，用更易於理解的語言和比喻重新詮釋，幫助您快速掌握核心思想。
+3.  **補充實務經驗**：結合業界的最佳實踐，補充官方文件中沒有提及、但在實務上卻至關重要的「眉角」。
 
+我們的目標是讓這個系列成為您學習 K8s 的最佳夥伴，無論您是初學者還是有經驗的工程師，都能從中獲益。
 
 ---
-在本系列開始前  
-先給大家一個觀念  
-k8s 跟 docker 都需要使用 container runtime 去執行容器  
-而他們基本都使用 containerd  
-換句話說 在一定程度上是很像的  
-只是 k8s 是 for 大型環境使用  
-docker 偏向小型環境  
-什麼意思呢？  
-舉例來說  
-如果你今天只是要載 2~3 位朋友出門  
-你可能會開著自排小客車出門: 你只要會打 D 檔/踩油門/踩煞車  
-docker 就像小客車概念  
-  
-如果你今天只是要載 10~20 位朋友出門  
-你會需要開大客車: 你得學會 手動排檔/車輛保養/轉彎半徑...及其餘知識    
-k8s 就像大客車概念  
-  
-如果你不會開小客車, 那開大客車就不用想了 因為你沒有基本能力  
-就跟台灣考駕照制度一樣  
-考大客車駕照前 必須先考小型車駕照, 這是基本門檻  
-  
-回到這裡  
-若還沒了解 docker 的話, 雖然沒人會阻止你學習 k8s  
-但一定會學得很痛苦, 這裡不會再去講 container 的基本知識  
-而且基本工太差, 很容易就學歪掉  
-請務必把學習 docker 當成學習 k8s 的基本門檻  
-等 docker 學的差不多後, 再回來閱讀此系列  
 
-## Why kubernetes ?
-其面提到 docker 是 for 小型環境  
-在面對大型環境時就會遇到許多困境, 困境來自功能的不滿足  
-舉例來說   
-- 服務發現與負載平衡
-- 跨多主機的容器調度與管理
-- 自動擴展
-- 自我修復
-- 複雜的應用程式部署與更新流程
-- 權限控管  
+## 學習 K8s 之前：先學會 docker 
 
-如果真要說誰更了解大環境的需求, 那 google 當之莫屬  
-因此由 google 催生的 k8s 來自實務上的需求, 非常好的解決了上面的需求  
-這也是為什麼 k8s 屹立不搖的原因  
+在深入 K8s 之前，有一個重要的先備條件：**您必須對容器 (Container) 和 Docker 有基本的了解。**
 
+-   **Docker 就像自排小客車**：您只需要學會打檔、踩油門和煞車，就能輕鬆上路。它適合在單一主機或小型環境中運行容器。
+-   **K8s 則像手排大客車**：您不僅需要具備開小客車的基本技能，還得學習手動排檔、車輛保養、判斷轉彎半徑等進階知識。它專為管理大規模、跨多主機的容器化應用而設計。
 
-但是也必須要說  
-k8s 功能多 勢必等於學習門檻會提高  
-因此學習 k8s 必須做好決心  
-他比 docker 複雜了不少  
-如果環境內 docker 使用上沒有遇到痛點  
-那十之八九導入 k8s 只會帶來不必要的管理負擔  
-因此也順便告訴大家, 導入技術前務必做好評估  
-千萬不要盲從  
+如果您還不熟悉 Docker，強烈建議您先花時間學習容器的基本概念。這會讓您的 K8s 學習之路事半功倍。
 
+## 為什麼選擇 Kubernetes？
 
-## index
+當您開的小客車 (Docker) 已經無法滿足搭載數十位乘客（大規模應用）的需求時，您自然會需要一輛大客車 (K8s)。K8s 解決了 Docker 在大規模環境中遇到的種種挑戰：
 
-這邊將官方文件做分類  
+-   **自動化 (Automation)**：自動處理服務發現、負載平衡、自我修復和擴展等繁瑣工作。
+-   **宣告式 (Declarative)**：您只需要「宣告」您想要的最終狀態，K8s 會自動地、持續地將系統調整至該狀態。
+-   **可擴展性 (Extensibility)**：憑藉其開放的架構和豐富的生態系，您可以輕易地擴展 K8s 的功能，以滿足各種複雜的需求。
 
-### beginner 
-這個類別是建議所有人都該學會 k8s 的知識  
-原文可會講的太過深入, 我認為不必了解的東西我就不會做說明  
+然而，強大的功能也意味著更高的學習曲線。請務必在評估導入 K8s 前，確認您當前的環境確實遇到了 Docker 無法解決的痛點，切勿為了技術而技術。
 
-- [Concepts - Overview](/posts/20250616_k8s-doc-reading-concepts-overview/)
-- [Concepts - Cluster Architecture](/posts/20250616_k8s-doc-reading-concepts-cluster-architecture/)
-- [Concepts - Cluster Architecture: Node](/posts/20250617_k8s-doc-reading-concepts-cluster-architecture-node/)
-- [Concepts - Workloads](/posts/20250617_k8s-doc-reading-concepts-workloads/)
-- [Getting started](/posts/20250618_k8s-doc-reading-getting-started/)
-- [Getting started-helm](/posts/20250627_k8s-doc-reading-getting-started-helm/)
-- [Concepts - Workloads: Workload Management - deployments](/posts/20250620_k8s-doc-reading-workload-management-deployments/)
-- [Concepts - Workloads: Workload Management - statefulsets](/posts/20250623_k8s-doc-reading-workload-management-statefulsets/)
-- [Concepts - Workloads: Workload Management - DaemonSet](/posts/20250624_k8s-doc-reading-workload-management-demonset/)
-- [Concepts - Workloads: Workload Management - Jobs](/posts/20250625_k8s-doc-reading-workload-management-jobs/)
-- [Concepts - Workloads: Workload Management - CronJob](/posts/20250625_k8s-doc-reading-workload-management-cronjob/)
-- [Concepts - Workloads: Autoscaling Workloads](/posts/20250625_k8s-doc-reading-workload-autoscaling-workloads/)
-- [Concepts - Services, Load Balancing, and Networking](/posts/20250626_k8s-doc-reading-services-loadbalancing-networking/)
-- [Concepts - Services, Load Balancing, and Networking: Service](/posts/20250626_k8s-doc-reading-services/)
-- [Concepts - Services, Load Balancing, and Networking: Ingress](/posts/20250627_k8s-doc-reading-ingress/)
-- [Concepts - Services, Load Balancing, and Networking: Gateway API](/posts/20250627_k8s-doc-reading-gateway/)
-- [Concepts - Services, Load Balancing, and Networking: Network Policies](/posts/20250627_k8s-doc-reading-network-policy/)
-- [Concepts - Services, Load Balancing, and Networking: DNS for Services and Pods](/posts/20250627_k8s-doc-reading-dns/)
-- [Concepts - Storage: Volumes](/posts/20250702_k8s-doc-reading-storage-volume/)
-- [Concepts - Storage: Volumes - Storage](/posts/20250703_k8s-doc-reading-storage-volume-storage/)
-- [Concepts - Configuration - ConfigMaps](/posts/20250703_k8s-doc-reading-configuration-configmaps/)
-- [Concepts - Configuration - Secrets](/posts/20250703_k8s-doc-reading-configuration-secrets/)
-- [Concepts - Configuration - Liveness, Readiness, and Startup Probes](/posts/20250703_k8s-doc-reading-configuration-probes/)
-- [Concepts - Configuration - Resource Management for Pods and Containers](/posts/20250704_k8s-doc-reading-configuration-resource_management_for_pods_and_containers/)
-- [Concepts - Scheduling, Preemption and Eviction: Assigning Pods to Nodes](/posts/20250704_k8s-doc-reading-assign_pod_to_node/)
-- [Concepts - Scheduling, Preemption and Eviction: Taints and Tolerations](/posts/20250704_k8s-doc-reading-taint-and-toleration/)
-- [Concepts - Cluster Administration: Node Shutdowns](/posts/20250708_k8s-doc-reading-cluster-administration_node-shutdown/)
-- [Concepts - Objects In Kubernetes](/posts/20250712_k8s-doc-reading-objects-in-kubernetes/)
+## 本系列學習路徑 (Index)
 
+我們將官方文件重新梳理，規劃成以下四個學習階段。建議您按照順序閱讀，以建立穩固的知識體系。
 
-### intermediate
-- Concepts - Workloads: Autoscaling Workloads
-- Concepts - Workloads - Pods
-- Concepts - Workloads - Pods: Pod Lifecycle
-- Concepts - Workloads - Pods: Init Containers ?? Concepts - Containers - Container Lifecycle Hooks
-- Concepts - Workloads - Pods: Sidecar Containers
+### 階段一：核心概念與工作負載 (Core Concepts & Workloads)
+*目標：理解 K8s 的基本組成、如何在 K8s 中運行您的第一個應用程式。*
+-   [Concepts - Overview](/docs/k8s-doc-reading/20250616_k8s-doc-reading-concepts-overview/)
+-   [Concepts - Cluster Architecture (架構總覽)](/docs/k8s-doc-reading/20250616_k8s-doc-reading-concepts-cluster-architecture/)
+-   [Concepts - Cluster Architecture: Node (節點詳解)](/docs/k8s-doc-reading/20250617_k8s-doc-reading-concepts-cluster-architecture-node/)
+-   [Concepts - Workloads (工作負載介紹)](/docs/k8s-doc-reading/20250617_k8s-doc-reading-concepts-workloads/)
+-   [Getting started (開始使用 kubectl)](/docs/k8s-doc-reading/20250618_k8s-doc-reading-getting-started/)
+-   [Getting started - Helm (套件管理)](/docs/k8s-doc-reading/20250627_k8s-doc-reading-getting-started-helm/)
+-   [Workload - Deployments (無狀態應用)](/docs/k8s-doc-reading/20250620_k8s-doc-reading-workload-management-deployments/)
+-   [Workload - StatefulSets (有狀態應用)](/docs/k8s-doc-reading/20250623_k8s-doc-reading-workload-management-statefulsets/)
+-   [Workload - DaemonSet (節點常駐應用)](/docs/k8s-doc-reading/20250624_k8s-doc-reading-workload-management-demonset/)
+-   [Workload - Jobs (一次性任務)](/docs/k8s-doc-reading/20250625_k8s-doc-reading-workload-management-jobs/)
+-   [Workload - CronJob (定時任務)](/docs/k8s-doc-reading/20250625_k8s-doc-reading-workload-management-cronjob/)
 
-- Concepts - Services, Load Balancing, and Networking: EndpointSlices
-- Concepts - Services, Load Balancing, and Networking: Topology Aware Routing
+### 階段二：網路、儲存與設定 (Networking, Storage & Configuration)
+*目標：掌握如何將服務對外暴露、如何讓資料持久化，以及如何管理應用程式的設定。*
+-   [Networking - Service, loadbalancing, networking](/docs/k8s-doc-reading/20250626_k8s-doc-reading-services-loadbalancing-networking/)
+-   [Networking - Service (服務發現)](/docs/k8s-doc-reading/20250626_k8s-doc-reading-services/)
+-   [Networking - Ingress (七層負載平衡)](/docs/k8s-doc-reading/20250627_k8s-doc-reading-ingress/)
+-   [Networking - Gateway API (下一代路由 API)](/docs/k8s-doc-reading/20250627_k8s-doc-reading-gateway/)
+-   [Networking - Network Policies (網路防火牆)](/docs/k8s-doc-reading/20250627_k8s-doc-reading-network-policy/)
+-   [Networking - DNS](/docs/k8s-doc-reading/20250627_k8s-doc-reading-dns/)
+-   [Storage - Volumes (儲存卷)](/docs/k8s-doc-reading/20250702_k8s-doc-reading-storage-volume/)
+-   [Storage - Persistent Volumes (持久化儲存)](/docs/k8s-doc-reading/20250703_k8s-doc-reading-storage-volume-storage/)
+-   [Configuration - ConfigMaps (設定檔管理)](/docs/k8s-doc-reading/20250703_k8s-doc-reading-configuration-configmaps/)
+-   [Configuration - Secrets (密鑰管理)](/docs/k8s-doc-reading/20250703_k8s-doc-reading-configuration-secrets/)
 
+### 階段三：調度、維運與自動擴展 (Scheduling, Operations & Autoscaling)
+*目標：學習更精細的資源與調度管理，以及如何讓叢集自動化維運。*
+-   [Configuration - Probes (健康檢查)](/docs/k8s-doc-reading/20250703_k8s-doc-reading-configuration-probes/)
+-   [Configuration - Resource Management (資源管理與 QoS)](/docs/k8s-doc-reading/20250704_k8s-doc-reading-configuration-resource_management_for_pods_and_containers/)
+-   [Scheduling - Assigning Pods to Nodes (節點親和性)](/docs/k8s-doc-reading/20250704_k8s-doc-reading-assign_pod_to_node/)
+-   [Scheduling - Taints and Tolerations (污點與容忍)](/docs/k8s-doc-reading/20250704_k8s-doc-reading-taint-and-toleration/)
+-   [Operations - Node Shutdowns (節點維護)](/docs/k8s-doc-reading/20250708_k8s-doc-reading-cluster-administration_node-shutdown/)
+-   [Operations - Autoscaling Workloads (自動擴展)](/docs/k8s-doc-reading/20250625_k8s-doc-reading-workload-autoscaling-workloads/)
 
-- Concepts - Security: Cloud native information security 
-- Concepts - Security: Role Based Access Control Good Practices
-- Concepts - Security: Good practices for Kubernetes Secrets
+### 階段四：安全與生態系 (Security & Ecosystem)
+*目標：探索 K8s 的權限管理、安全性原則，以及其強大的擴展能力。*
+-   [Security - Authentication Part 1 (認證與授權 - 基礎)](/docs/k8s-doc-reading/20250810_k8s-authentication-part1/)
+-   [Security - Authentication Part 2 (認證與授權 - 使用者帳號)](/docs/k8s-doc-reading/20250810_k8s-authentication-part2/)
+-   [Ecosystem - Objects In Kubernetes (物件管理)](/docs/k8s-doc-reading/20250712_k8s-doc-reading-objects-in-kubernetes/)
+-   [Ecosystem - UI Tools (儀表板工具)](/docs/k8s-doc-reading/20250810_k8s-UI-tools/)
 
+---
 
-
-
-
-- Concepts - Cluster Architecture: Kubernetes Self-Healing
-- Getting started - Production environment
-### advanced
-- Concepts - Workloads - Pods: Pod Quality of Service Classes
-- Concepts - Workloads - Pods: User Namespaces
-- Concepts - Workloads - Pods: Downward API
-
-- Concepts - Storage - Volumes: Projected Volumes
-- Concepts - Storage - Volumes: Persistent Volumes
-- Concepts - Storage - Volumes: Volume Attributes Classes
-- Concepts - Storage - Volumes: Volume Snapshots
-- Concepts - Storage - Volumes: Volume Snapshot Classes
-- Concepts - Storage - Volumes: CSI Volume Cloning
-- Concepts - Storage - Volumes: Storage Capacity
-- Concepts - Storage - Volumes: Node-specific Volume Limits
-
-- Concepts - Configuration - Organizing Cluster Access Using kubeconfig Files
-- Concepts - Security: Pod Security Standards
-- Concepts - Security: Pod Security Admission
-- Concepts - Security: Multi-tenancy
-- Concepts - Security: Linux kernel security constraints for Pods and containers
-
-
-
-- Concepts - Workloads - Pods: Disruptions
-
-- Administer a Cluster: Overprovision Node Capacity For A Cluster
-
-- Getting started - Best practices: Considerations for large clusters
-- Getting started - Best practices: Running in multiple zones
-- Getting started - Best practices: Validate node setup
-- Getting started - Best practices: Enforcing Pod Security Standards
-- Getting started - Best practices: PKI certificates and requirements
+準備好了嗎？讓我們一起踏上這趟 Kubernetes 的學習之旅吧！
 

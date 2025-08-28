@@ -10,134 +10,101 @@ weight: 7
 
 <!--more-->
 
-在 getting start 我們安裝了 k3s  
+## 為什麼需要 Helm？
 
-以及使用了 kubectl 去新增 deplyment & service  
-可是這其實相當難以管理眾多的 manifest  
-因此 helm 這個工具就誕生了  
-> 同類型的工具很多, k8s 官方也提供 Kustomize 
-> 但目前來說 helm 是主流, 所以建議大家學習 helm  
+在前面的章節中，我們學會了使用 `kubectl apply -f` 來部署 Kubernetes (K8s) 的 YAML 設定檔。對於單一的應用程式，這或許還能應付。但想像一下，一個完整的應用程式可能包含：
+-   一個 `Deployment`
+-   一個 `Service`
+-   一個 `Ingress`
+-   一個 `ConfigMap`
+-   可能還有 `Secret`, `ServiceAccount`, `PersistentVolumeClaim`...
 
+當您需要在不同環境（開發、測試、生產）部署這套應用，或是要將您的應用分享給他人時，手動管理這一大堆 YAML 檔案會變成一場災難。
 
-## install helm
+**Helm** 就是為了解決這個問題而誕生的。它被譽為「**The package manager for Kubernetes**」，是 K8s 世界的 `apt`、`yum` 或 `Homebrew`。
 
-Helm 官方提供了很多安裝方式, 其中最簡單的是 script 安裝
+## Helm 核心概念解析：食譜的比喻
 
-```bash
-https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-```
+要理解 Helm，我們可以把它比喻成「照著食譜做菜」：
 
+| Helm 概念 | 食譜比喻 | 角色 |
+| :--- | :--- | :--- |
+| **Chart** | 食譜 | 一份預先打包好的部署方案，它定義了安裝一個應用程式（例如 WordPress）所需的所有 K8s 物件（Deployment, Service 等）的**模板**。 |
+| **`values.yaml`** | 客製化選項 | 食譜上提供的客製化選項。例如，「辣度：可選微辣、中辣、大辣」。使用者可以透過修改這些值，來調整最終部署的細節，而無需修改複雜的食譜本身。 |
+| **Release** | 菜餚 | 根據一份 Chart (食譜) 和您指定的 `values` (客製化選項)，在您的 K8s 叢集上建立的一個**實際運行的應用實例**。 |
+| **Repository**| 食譜倉庫 | 一個集中的地方，用來存放和分享各種 Charts (食譜)。 |
 
-## helm introduction
+Helm 的核心價值在於其**模板化 (Templating)** 與**可配置性 (Configurability)**。它讓複雜的 K8s 應用部署，變得像安裝一個軟體套件一樣簡單。
 
-Helm 是 Kubernetes 的 manifest(yaml) 管理器。把一堆 k8s manifest 包裝成一個 chart
-透過 chart 我們可以很輕鬆地安裝、升級、刪除 k8s 上的應用程式
+## 實戰：三步驟部署你的第一個應用
 
-主要有幾個核心概念
-- **Chart**: Helm 的打包格式, 包含了一組 k8s manifest 的模板
-- **Release**: 在 k8s 集群上運行的 chart 的一個實例
-- **Repository**: 用來存放和分享 chart 的地方
+讓我們來實際操作一次，使用 Helm 在 K8s 上部署一個 NGINX 網站。
 
-## getting start helm chart
-
-我們來試著安裝一個 nginx chart  
-首先, 我們需要新增一個 repository(使用人家寫好的 chart)  
-
+### 步驟 1：加入 Chart 倉庫 (Repository)
+首先，我們需要告訴 Helm 去哪裡找「食譜」。[Bitnami](https://bitnami.com/stacks/helm) 維護了一個非常流行的高品質 Chart 倉庫。
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
 ```
 
-搜尋看看有沒有 nginx chart 可以使用   
+### 步驟 2：搜尋並檢查 Chart
+我們可以搜尋看看這個倉庫裡有沒有 NGINX 的 Chart。
 ```bash
 $ helm search repo nginx
-NAME                                            CHART VERSION   APP VERSION     DESCRIPTION                                       
-bitnami/nginx                                   20.0.7          1.28.0          NGINX Open Source is a web server that can be a...
-
+NAME             	CHART VERSION	APP VERSION	DESCRIPTION
+bitnami/nginx    	20.0.7       	1.28.0     	NGINX Open Source is a web server that can be a...
+...
 ```
-
-最後, 我們安裝 nginx  
+我們找到了 `bitnami/nginx`。在安裝之前，可以先用 `helm show values` 看看它提供了哪些「客製化選項」(`values.yaml`)。
 ```bash
-helm install my-nginx bitnami/nginx
+helm show values bitnami/nginx
+```
+您會看到非常多的可配置項，例如 `replicaCount`, `service.type`, `ingress.enabled` 等。
+
+### 步驟 3：安裝 Chart 並客製化
+現在，我們來安裝這個 Chart，並建立一個名為 `my-nginx` 的 Release。同時，我們使用 `--set` 參數來**覆蓋**預設的 `values`，將服務類型改為 `NodePort`。
+
+```bash
+helm install my-nginx bitnami/nginx --set service.type=NodePort
+```
+安裝完成後，Helm 會輸出一些有用的資訊，告訴您如何存取這個 NGINX 服務。您也可以透過 `kubectl get all` 來查看 Helm 為您建立的所有 K8s 物件。
+
+**管理您的 Release：**
+```bash
+# 列出所有已安裝的 Release
+helm list
+
+# 升級 Release (例如，開啟 Ingress)
+helm upgrade my-nginx bitnami/nginx --set ingress.enabled=true
+
+# 卸載 Release (會刪除所有相關的 K8s 物件)
+helm uninstall my-nginx
 ```
 
-透過 `kubectl get pod` 可以看到 nginx 已經被安裝上去了  
+## 深入 Chart 結構
 
+一個 Helm Chart 本質上是一個特定結構的目錄。您可以透過 `helm pull --untar` 指令下載任何 Chart 的原始碼來一探究竟。
 
-接著我們把 chart download 下來看看裡面  
 ```bash
 helm pull bitnami/nginx --untar
+cd nginx
+tree .
 ```
 
-結構
-```bash 
-$ tree
-.
-├── Chart.lock
-├── charts
-│   └── common
-│       ├── Chart.yaml
-│       ├── README.md
-│       ├── templates
-│       │   ├── _affinities.tpl
-│       │   ├── _capabilities.tpl
-│       │   ├── _compatibility.tpl
-│       │   ├── _errors.tpl
-│       │   ├── _images.tpl
-│       │   ├── _ingress.tpl
-│       │   ├── _labels.tpl
-│       │   ├── _names.tpl
-│       │   ├── _resources.tpl
-│       │   ├── _secrets.tpl
-│       │   ├── _storage.tpl
-│       │   ├── _tplvalues.tpl
-│       │   ├── _utils.tpl
-│       │   ├── validations
-│       │   │   ├── _cassandra.tpl
-│       │   │   ├── _mariadb.tpl
-│       │   │   ├── _mongodb.tpl
-│       │   │   ├── _mysql.tpl
-│       │   │   ├── _postgresql.tpl
-│       │   │   ├── _redis.tpl
-│       │   │   └── _validations.tpl
-│       │   └── _warnings.tpl
-│       └── values.yaml
-├── Chart.yaml
-├── README.md
-├── templates
-│   ├── deployment.yaml
-│   ├── extra-list.yaml
-│   ├── health-ingress.yaml
-│   ├── _helpers.tpl
-│   ├── hpa.yaml
-│   ├── ingress-tls-secret.yaml
-│   ├── ingress.yaml
-│   ├── networkpolicy.yaml
-│   ├── NOTES.txt
-│   ├── pdb.yaml
-│   ├── prometheusrules.yaml
-│   ├── server-block-configmap.yaml
-│   ├── serviceaccount.yaml
-│   ├── servicemonitor.yaml
-│   ├── stream-server-block-configmap.yaml
-│   ├── svc.yaml
-│   └── tls-secret.yaml
-├── values.schema.json
-└── values.yaml
-```
+其中，最重要的三個部分是：
 
-charts/: 用於存放此 chart 依賴的其他 chart (subcharts) 
-Chart.lock: 用於鎖定 chart 依賴的 subcharts 的版本，確保每次部署的一致性  
-Chart.yaml: 包含了 chart 的元數據，例如 chart 名稱、版本、描述等  
-README.md: 提供 chart 的人類可讀的說明文件   
-templates/: 存放 Kubernetes 資源的模板文件。Helm 會將這裡的模板與 `values.yaml` 的值結合，生成最終的 Kubernetes manifest  
-values.yaml: 提供 chart 的默認配置值。用戶可以覆蓋這些值來自定義 chart 的部署  
+-   `Chart.yaml`: 包含了 Chart 的元數據，例如名稱、版本、描述等。
+-   `values.yaml`: **客製化核心**。定義了所有可供使用者調整的預設變數。
+-   `templates/`: **模板核心**。存放了所有 K8s 物件的 YAML 模板檔案。這些檔案使用 Go 模板語法，並會在部署時，將 `values.yaml` 中的值渲染進去，最終生成標準的 K8s YAML。
+
+## Helm vs. Kustomize
+
+另一個常見的 K8s 設定管理工具是 [Kustomize](https://kustomize.io/)，它也被整合進了 `kubectl` 中。兩者的哲學不同：
+
+-   **Helm**：**模板化**。它像一個程式語言，有變數、有函式、有邏輯控制。功能強大，但學習曲線稍高。
+-   **Kustomize**：**疊加式 (Overlay)**。它透過對基礎 YAML 進行「打補丁 (Patch)」的方式來產生不同環境的設定，侵入性小，更貼近原生 YAML。
+
+兩者各有優劣，但目前 Helm 憑藉其豐富的社群生態和強大的打包能力，在「應用程式分發」領域仍佔據主流地位。
 
 ---
-
-以上是 helm 的快速入門  
-如果一個完整的 app 需要 deploymnet,service,...etc  
-而他相依的 DB 也需要 deploymnet,service,...etc  
-會有非常多的 yaml file 要管理  
-helm 會包成一個 chart  
-並利用 template 機制產生 yaml  
-讓管理 app 所有 yaml 簡單的多  
+Helm 是 K8s 生態系中不可或- 缺的一環。學會使用 Helm，不僅能讓您輕鬆部署社群中成千上萬的開源應用，更能幫助您標準化、模組化地管理自己的應用程式，是每一位 K8s 使用者都應掌握的關鍵技能。

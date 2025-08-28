@@ -12,33 +12,49 @@ weight: 32
 
 [doc link](https://kubernetes.io/docs/reference/access-authn-authz/authentication/)
 
-## normal user account  
+在 [Part 1](@/docs/k8s-doc-reading/20250810_k8s-authentication-part1/index.md) 中，我們介紹了 Kubernetes (K8s) 的兩種帳號類型，並深入探討了主要用於 Pod 內部流程自動化的 **ServiceAccount**。
 
-雖然使用 service account 可以達成權限管理  
-但是實務上可能會使用 LDAP or OAuth 來直接使用外部帳號  
-藉此達成 Single Sign-On  
+這篇文章將聚焦於另一種帳號類型：**Normal User Account**，也就是專門為「人類」使用者（如開發者、維運人員）設計的帳號。
 
-因此除了 service account 之外  
-這邊再介紹幾種常見的 normal user account 管理方法   
+## 為什麼需要 Normal User Account？
 
-### X509 client certificates 
-default 產生的 kubeconfig 就是採用此方式  
+雖然 ServiceAccount 也可以透過 `kubeconfig` 給人類使用者使用，但它並非為此設計。在企業環境中，我們通常希望能夠：
+-   整合現有的身份驗證系統（如 LDAP, Active Directory, Google Workspace）。
+-   實現單一登入 (Single Sign-On, SSO)。
+-   集中管理使用者身份和權限，而非在 K8s 中手動建立和分發憑證。
 
+K8s 本身不直接管理 Normal User，而是透過整合外部身份提供者 (Identity Provider, IdP) 來實現認證。本篇將介紹兩種最常見的 Normal User 認證方式。
+
+## 方法一：X.509 客戶端憑證 (Client Certificates)
+
+這是 K8s 最基礎的認證方式，也是您透過 `kubeadm` 或 `k3s` 建立叢集時，預設產生的 `kubeconfig` 所使用的方式。
+
+它的原理是為每一位使用者產生一對獨一無二的 TLS 私鑰和憑證，並由 K8s 叢集的 CA (憑證授權中心) 簽署。API Server 會驗證客戶端提交的憑證是否由受信任的 CA 簽發，並從憑證的 `Subject` 欄位中提取使用者名稱 (`CN`) 和所屬群組 (`O`)。
+
+雖然這種方式安全可靠，但管理起來非常繁瑣，因為您需要為每一位使用者手動產生、簽署、分發和撤銷憑證。
+
+### 操作流程：為使用者 `jane` 建立 `kubeconfig`
+
+以下是為一位名叫 `jane`、隸屬於 `developers` 群組的使用者，手動建立一個僅能讀取 `default` namespace 下 Pod 權限的 `kubeconfig` 的完整流程。
+
+#### 步驟 1：產生私鑰和憑證簽署請求 (CSR)
 ```bash
-
 # 為 jane 產生一個 2048 位元的 RSA 私鑰
 openssl genrsa -out jane.key 2048
 
-# 建立一個 CSR
+# 建立一個 CSR (Certificate Signing Request)
 # CN=jane 代表使用者名稱是 "jane"
 # O=developers 代表她屬於 "developers" 群組
 openssl req -new -key jane.key -out jane.csr -subj "/CN=jane/O=developers"
+```
 
+#### 步驟 2：透過 K8s 簽署憑證
+```bash
 # 將 CSR 檔案內容進行 Base64 編碼
 CSR_BASE64=$(cat jane.csr | base64 -w 0)
 
-# create csr.yaml
-tee csr.yaml <<EOF
+# 建立一個 CertificateSigningRequest 物件的 YAML 檔
+cat <<EOF > csr.yaml
 apiVersion: certificates.k8s.io/v1
 kind: CertificateSigningRequest
 metadata:
@@ -50,107 +66,134 @@ spec:
   - client auth
 EOF
 
-# apply scr to k8s
+# 將 CSR 提交給 K8s
 kubectl apply -f csr.yaml
 
-# check status 
-kubectl get csr
-## NAME       AGE   SIGNERNAME                            REQUESTOR      REQUESTEDDURATION   CONDITION
-## jane-csr   6s    kubernetes.io/kube-apiserver-client   system:admin   <none>              Pending
-
-# aprove scr
+# 由叢集管理員批准這個 CSR
 kubectl certificate approve jane-csr
 
-# check status 
-kubectl get csr
-## NAME       AGE   SIGNERNAME                            REQUESTOR      REQUESTEDDURATION   CONDITION
-## jane-csr   34s   kubernetes.io/kube-apiserver-client   system:admin   <none>              Approved,Issued
-
-# download cert
+# 下載簽署好的憑證
 kubectl get csr jane-csr -o jsonpath='{.status.certificate}' | base64 --decode > jane.crt
 ```
 
-綁定 role
-```bash { filename=jane_RoleBinding.yaml }
+#### 步驟 3：建立 RBAC 授權
+```bash
+# 建立一個 RoleBinding，將使用者 'jane' 和預先定義好的 'pod-reader' Role 綁定
+cat <<EOF > jane-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: read-pods-jane
   namespace: default
 subjects:
-- kind: User  # 我們是綁定到一個使用者
+- kind: User
   name: jane  # 這就是 CSR 中 CN 的值
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: pod-reader
+  name: pod-reader # 假設這個 Role 已經存在
   apiGroup: rbac.authorization.k8s.io
+EOF
+
+kubectl apply -f jane-rolebinding.yaml
 ```
 
-套用  
+#### 步驟 4：產生專屬的 Kubeconfig
 ```bash
-kubectl apply -f jane_RoleBinding.yaml
-```
-
-建立 kubeconfig for jane  
-```bash
+# 這個腳本會讀取當前的叢集資訊，並結合 jane 的憑證，產生一個新的 kubeconfig 檔案
 KUBECONFIG_FILE="kubeconfig-jane.yaml"
-
-
-CURRENT_CONTEXT=$(kubectl config current-context)
-# --- Get Cluster Info ---
 CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}')
 SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
-
-# --- Use the --raw flag to get the CA data ---
 CA_DATA=$(kubectl config view --raw --minify -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
 
-
-# 1. 設定叢集資訊
-echo "${CA_DATA}" | base64 --decode > ca.crt.tmp
-
-# 2: 讓 kubectl 從這個臨時檔案讀取憑證
+# 設定叢集資訊
 kubectl config set-cluster ${CLUSTER_NAME} \
   --server=${SERVER} \
-  --certificate-authority=ca.crt.tmp \
+  --certificate-authority-data=${CA_DATA} \
   --embed-certs=true \
   --kubeconfig=${KUBECONFIG_FILE}
 
-# 3. 設定使用者憑證 (私鑰和公鑰憑證)
+# 設定使用者憑證
 kubectl config set-credentials jane \
   --client-key=jane.key \
   --client-certificate=jane.crt \
   --embed-certs=true \
   --kubeconfig=${KUBECONFIG_FILE}
 
-# 4. 設定 context，將使用者和叢集綁定在一起
+# 設定 Context
 kubectl config set-context jane-context \
   --cluster=${CLUSTER_NAME} \
   --user=jane \
   --namespace=default \
   --kubeconfig=${KUBECONFIG_FILE}
 
-# 5. 設定 default context
+# 設定預設 Context
 kubectl config use-context jane-context --kubeconfig=${KUBECONFIG_FILE}
-
 
 echo "✅ Kubeconfig file '${KUBECONFIG_FILE}' created successfully."
 
-# --- Test the new kubeconfig ---
+# --- 測試新的 kubeconfig ---
 echo "Testing the new kubeconfig..."
-kubectl --kubeconfig=${KUBECONFIG_FILE} get pods
-kubectl --kubeconfig=${KUBECONFIG_FILE} get node # should fail
+kubectl --kubeconfig=${KUBECONFIG_FILE} get pods # 應該成功
+kubectl --kubeconfig=${KUBECONFIG_FILE} get nodes # 應該失敗 (權限不足)
 ```
 
-### OpenID Connect
+## 方法二：OpenID Connect (OIDC) - 推薦
 
-因為 k8s 只支援 OpenID Connect  
-因此通常會使用 [dex](https://dexidp.io) 協助介接 LDAP, SAML, and OAuth2 ...etc  
+手動管理憑證顯然不適合大型團隊。在企業環境中，**OpenID Connect (OIDC)** 是整合外部身份驗證的**推薦**方式。
 
-#### install dex
+OIDC 是一個基於 OAuth 2.0 的身份驗證協定。K8s API Server 可以配置為信任一個外部的 OIDC IdP (Identity Provider)，例如 Google, Okta, Keycloak, 或 GitLab。
 
-由於是 lab 環境
+### 運作流程
+1.  使用者試圖用 `kubectl` 存取叢集。
+2.  `kubectl` 將使用者導向到 OIDC IdP (例如 Google 登入頁面) 進行登入。
+3.  登入成功後，IdP 會回傳一個 `ID Token` 給使用者。
+4.  `kubectl` 將這個 `ID Token` 包含在請求中，發送給 K8s API Server。
+5.  API Server 會向 IdP 驗證此 `ID Token` 的有效性。
+6.  驗證通過後，API Server 從 `ID Token` 中提取使用者資訊（如 Email 和群組），並根據 RBAC 規則進行授權。
 
-```bash
+### 使用 Dex 進行整合
 
+K8s API Server 只支援 OIDC 協定。如果您的公司使用的是 LDAP、SAML 或其他非 OIDC 的認證系統，該怎麼辦？
+
+這時就需要一個中間人，而 [**Dex**](https://dexidp.io/) 就是最受歡迎的選擇。Dex 是一個開源的身份服務，它可以作為一個橋樑，連接各種後端使用者系統 (稱為 `Connectors`)，並將它們統一以 OIDC 的形式暴露給 K8s。
+
+```mermaid
+graph TD;
+    subgraph Your Company
+        LDAP;
+        SAML;
+        GitHub;
+    end
+
+    subgraph Kubernetes Cluster
+        subgraph Dex
+            direction LR
+            conn[Connectors] --> dex_core[Dex Core];
+            dex_core -- OIDC --> api_server[API Server];
+        end
+    end
+    
+    LDAP --> conn;
+    SAML --> conn;
+    GitHub --> conn;
+    
+    user[User] -- kubectl --> api_server;
+    api_server -- Redirect to Dex --> user;
+    user -- Login via LDAP etc. --> Dex;
+    Dex -- ID Token --> user;
+    user -- Request with ID Token --> api_server;
 ```
+
+透過 Dex，您可以無縫地將現有的企業身份系統與 K8s 整合，實現真正的 SSO，而無需在 K8s 中維護任何使用者憑證。由於 Dex 的安裝與設定較為複雜，我們將在後續的文章中提供詳細的實作教學。
+
+## 總結
+
+| 特性 | X.509 憑證 | OpenID Connect (OIDC) |
+| :--- | :--- | :--- |
+| **管理方式** | 手動，分散式 | 集中式，自動化 |
+| **適用場景** | 小型團隊、測試環境、自動化腳本 | 中大型企業、需要 SSO 的場景 |
+| **優點** | 概念簡單、無需額外服務 | SSO、集中管理、易於擴展、支援多種 IdP |
+| **缺點** | 管理複雜、難以擴展、憑證撤銷困難 | 需要額外部署和維護 IdP (如 Dex) |
+
+對於任何正式的生產環境或多人協作的場景，強烈建議投入時間設定 **OIDC** 整合。

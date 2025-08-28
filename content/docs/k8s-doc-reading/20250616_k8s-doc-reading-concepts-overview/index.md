@@ -9,137 +9,134 @@ weight: 2
 ![alt](images/banner.png)  
 
 <!--more-->
-[doc link](https://kubernetes.io/docs/concepts/overview/)  
-為什麼有 docker 之後, 又要有 k8s 呢？ 
-簡單來說 docker 在小環境跑起來沒問題  
-但是當要在中大環境執行時, 就開始面臨管理上的困難  
+[doc link](https://kubernetes.io/docs/concepts/overview/)
 
-在 doc 一開始 就直接表明 k8s 具有以下特性  
-- extensible: 
-  k8s 具有第三方擴充能力, 功能不會受限官方所開發的項目, 這樣 k8s 帶來無窮潛力  
-- declarative configuration: 
-  k8s 採用 config(yaml) 方式運作, 具有 reusable,easier to manage and understand 特點  
-  也可以大幅降低 OP 的手誤  
+## 為什麼需要 Kubernetes？
 
-- automation:  
-  要管理成千上萬的 container, 自動化將是必要的  
-  否則什麼都人工肯定會造成很大的負擔  
-  其中包含 scaling and failover   
+許多人會問：「既然有了 Docker，為什麼還需要 Kubernetes (K8s)？」
 
-## what Kubernetes provides
-### Service discovery and load balancing: 
-在 docker 中, 很容易遇到的挑戰是 container 跟 container 之間如何溝通  
-在一對一中 你首先要知道如何找到對方  
-在多對多中(replica) 你還要知道怎們進行 loadbalance(負載平衡)  
-因此一般在 docker 中你會需要借助外部的 loadbalancer 去完成
-在 k8s cluster 中 則是提供了 DNS name 的方式讓 container 能夠輕易找到對方的 endpoint(位置)  
-另外 k8s 也支援負載平衡 loadbalance, 在有 replica 的情況也能自動處理 loadbalance 而不須人為介入  
-  
-### Storage orchestration 
-k8s 支援不同的 storage 來源及設定, 包括類型(NFS,iSCSI,local), 設定(size,IOPS...)   
-讓不同需求的 container 可以使用不同的 storage 來源,來提昇彈性  
-舉例來說我新增設定檔 SSD, HDD  
-讓 cluster 內部的 container 可以根據需求使用 SSD or HDD 的 storage  
+簡單來說，Docker 在單一或小型環境中運行良好，但當擴展到中大型規模的生產環境時，就會面臨許多管理上的挑戰，例如：服務的自動修復 (auto-healing)、資源監控 (monitoring)、以及容器之間的網路連線等問題。
 
-### Automated rollouts and rollbacks 
-你可以讓 k8s 幫你完成 滾動升級(rolling upgrade) 跟退板  
-你不需要人工的更新 container  
-如果你有設定 health check  也能進一步達到金絲雀部屬(canery deploy)  
-讓每次的 release 更加穩定 & graceful  
+Kubernetes 的誕生正是為了解決這些問題。根據官方文件，K8s 的核心特性包含：
 
-### Automatic bin packing 
-k8s 會根據你的設定自動將 container 執行在有足夠 computing resource 的節點上  
-如果資源無法滿足, 則不會執行 container  
-這可以大幅度的避免 container 長在非常忙碌的節點上, 造成忙上加忙的窘境  
+- **宣告式組態 (Declarative Configuration)**：開發者透過 YAML 設定檔來定義應用程式的「期望狀態 (desired state)」。K8s 會自動調整並維護系統，使其符合這個狀態。這種方式不僅易於管理、理解和版本控制，也大幅降低了人為操作失誤的風險。
+- **自動化 (Automation)**：在需要管理成千上萬個容器的環境中，自動化是不可或缺的。K8s 自動處理了許多繁瑣的工作，包括擴展 (scaling) 和故障轉移 (failover)，讓維運人員不再需要手動介入。
+- **可擴展性 (Extensibility)**：K8s 具有強大的第三方擴充能力，其功能不受限於官方開發的項目。這使得社群可以圍繞 K8s 建立豐富的生態系，帶來無限的潛力。
 
-### Self-healing 
-k8s 能自動幫你找到異常的 container 進行暫時隔離/更換  
-並且避免外部流量持續進到異常的 container  
+## Kubernetes 提供了什麼？
 
-### Secret and configuration management 
-k8s 能夠協助管理 config 及資密資訊  
-避免你將機密資訊存在 container image  
+### 服務發現與負載平衡 (Service Discovery and Load Balancing)
 
-### Batch execution 
-可以讓 k8s 幫你進行 CI 相關的工作  
-因其 auto scale 的特性, 當用有 high loading 需求時有能發揮效益  
-  
-### Horizontal scaling 
-提供水平擴展功能(replica)  
-搭配 KEDA, 能夠支援多樣 trigger 來源  
-比如說 request 量變高時就進行 scale  
+在 Docker 環境中，容器間的通訊是一大挑戰。您不僅需要知道如何找到目標容器的 IP 位址，當服務擁有多個副本 (Replica) 時，還必須處理負載平衡 (Load Balancing) 的問題，這通常需要借助外部的負載平衡器 (Load Balancer) 來實現。
 
-### IPv4/IPv6 dual-stack 
-能同時支援 IPv4/IPv6  
+K8s 內建了解決方案。它透過 DNS 名稱的方式，讓容器可以輕易地找到彼此的端點 (Endpoint)。此外，K8s 也提供了原生的負載平衡功能，當服務有多個副本時，能夠自動分配流量，無需人為介入。
 
-### Designed for extensibility
-最重要的功能  
-k8s 提供了擴充能力  
-讓別人能夠輕易提供新功能  
-而不需要等待 k8s release  
-剛剛提到的 KEDA 就是之一  
-原生的 k8s 做 auto scale 的條件有限(CPU/Memory)  
-在實務上會有其他需求,比如說 queue length  
-那需要提 PR 並等 k8s release 嗎？  不用  
-一來這樣非常曠日費時  
-而且也會讓 k8s 體積直線上升, 對他人而言用不到的功能也只是徒增 resource 消耗  
-因此能夠根據需求再擴充的能力就非常重要  
+### 儲存編排 (Storage Orchestration)
 
-## What Kubernetes is not
+K8s 支援多種儲存解決方案，包括本地儲存、NFS、iSCSI 等。您可以根據不同的需求，為容器配置不同類型和效能的儲存空間（例如 SSD 或 HDD），從而提升應用的彈性。
 
-直接節錄原文  
-Kubernetes is not monolithic, and these default solutions are optional and pluggable. Kubernetes provides the building blocks for building developer platforms, but preserves user choice and flexibility where it is important.  
-這句話很重要  在剛學 k8s 的人必須要知道的事情  
-k8s 是模組化設計  
-有些東西你不喜歡官方預設選項的話  你是可以更換的 比如 kube-proxy  
-還有個重點  
-k8s 有些東西只有提供支援  但並沒有實做(implement), 比如說 ingress  
-舉例來說  
-政府蓋了國道1號  任何人都可以上路  
-但你必須自備汽車才行  
+### 自動化部署與回滾 (Automated Rollouts and Rollbacks)
 
-這是 k8s 很特別的點 也是很容易讓人感到困惑的點  
+K8s 能夠自動化您的應用程式部署流程。您可以執行「滾動升級 (Rolling Upgrade)」來逐一更新容器，而無需中斷服務。如果更新後出現問題，也可以快速地「回滾 (Rollback)」到先前的穩定版本。
+
+若搭配健康檢查 (Health Check)，更可以實現「金絲雀部署 (Canary Deployment)」，逐步將流量導向新版本，讓每次的發布都更加穩定、優雅 (graceful)。
+
+### 自動化裝箱 (Automatic Bin Packing)
+
+K8s 會根據您為容器設定的資源需求（如 CPU 和記憶體），自動將其調度到合適的節點 (Node) 上執行。如果沒有節點擁有足夠的資源，容器將不會被執行。這可以有效地避免將容器部署到已經非常忙碌的節點上，防止「忙上加忙」的窘境。
+
+### 自我修復 (Self-healing)
+
+K8s 會持續監控容器的健康狀態。當它偵測到異常的容器時，會自動將其隔離、替換或重啟，並確保外部流量不會再導向這些有問題的容器。
+
+### Secret 與組態管理 (Secret and Configuration Management)
+
+K8s 提供了專門的機制來管理設定檔 (ConfigMap) 和機密資訊 (Secret)，如密碼、API 金鑰等。這讓您可以將敏感資訊與容器映像檔 (Image) 分離，提升安全性。
+
+### 批次執行 (Batch Execution)
+
+除了長時間運行的服務，K8s 也可以用來管理批次處理和 CI (持續整合) 工作。搭配其自動擴展的特性，在有高負載需求時能發揮極佳的效益。
+
+### 水平擴展 (Horizontal Scaling)
+
+K8s 提供強大的水平擴展功能，可以根據 CPU 或記憶體使用率自動增加或減少服務的副本數量。若搭配 [KEDA](https://keda.sh/) 這類擴充工具，更能支援多樣化的觸發來源，例如：根據訊息隊列 (Message Queue) 的長度來進行擴展。
+
+### IPv4/IPv6 雙協議棧 (IPv4/IPv6 Dual-stack)
+
+K8s 能夠在同一個叢集中同時支援 IPv4 和 IPv6 網路。
+
+### 為可擴展性而設計 (Designed for Extensibility)
+
+這是 K8s 最重要的功能之一。它允許社群開發人員擴充其核心功能，而不需要修改核心原始碼或等待官方發布新版本。
+
+前面提到的 KEDA 就是一個很好的例子。原生的 K8s 在自動擴展方面主要依賴 CPU/Memory 指標，但在實際應用中，我們可能需要根據更複雜的條件（如佇列長度）來擴展。透過 K8s 的擴展機制，社群可以開發出像 KEDA 這樣的工具來滿足這些需求，而不會讓 K8s 本身變得臃腫。
+
+## Kubernetes 不是什麼？
+
+在學習 K8s 時，有一句重要的話必須理解：
+
+> Kubernetes is not monolithic, and these default solutions are optional and pluggable. Kubernetes provides the building blocks for building developer platforms, but preserves user choice and flexibility where it is important.
+
+這句話揭示了 K8s 的核心設計哲學：**模組化**與**靈活性**。
+
+K8s 就像一個樂高積木平台，它提供了許多基礎構件，但您可以自由選擇和替換這些構件。例如，如果您不喜歡預設的網路代理 `kube-proxy`，可以將其更換為其他的解決方案。
+
+另一個重點是，K8s 有些功能只定義了標準介面，但並**沒有提供預設的實作 (Implementation)**，例如 Ingress。這就像政府蓋好了一條高速公路，任何人都可以開車上路，但您必須自備車輛。Ingress 定義了流量進入叢集的規則，但您需要自行安裝一個 Ingress Controller (如 NGINX Ingress Controller) 來實現它。
+
+這個特點有時會讓初學者感到困惑，但它正是 K8s 強大和靈活的來源。
 
 ---
 
-以下一樣先貼原文, 再以中文解釋  
+以下同樣節錄原文，並附上中文解釋。
 
-### Does not limit the types of applications supported. 
-k8s 並沒有限制你可以跑什麼樣的東西  
-language or type 都沒有  
-總之 docker 能跑得 k8s 也能跑  
-只要照著 OCI 的標準的話  就能支援  
+### K8s 不限制應用程式的類型
 
+> Does not limit the types of applications supported.
 
-### Does not deploy source code and does not build your application. 
-與 docker 不同, k8s 不提供 build container image 的能力  
-不過前面說過 k8s 有擴充能力 > 所以你想的話也是可以搞出來的  
+K8s 不會限制您可以在上面運行的應用程式類型，無論是無狀態 (Stateless)、有狀態 (Stateful) 的應用，或是任何程式語言。基本上，只要您的應用程式可以被容器化並遵循 [OCI (Open Container Initiative)](https://opencontainers.org/) 標準，就可以在 K8s 上運行。
 
-### Does not provide application-level services
-簡單來說  就是只負責執行 container  
-不會提供 container 執行過程中需要的 dependenices(database or cache...etc)  
+### K8s 不部署原始碼，也不建置您的應用程式
 
-### Does not dictate logging, monitoring, or alerting solutions. 
-沒有限制 logging/monitoring/alerting 方法  
-你可以根據組織需求變更
+> Does not deploy source code and does not build your application.
 
-### Does not provide nor mandate a configuration language/system
-(for example, Jsonnet).  
-It provides a declarative API that may be targeted by arbitrary forms of declarative specifications.
+與某些 PaaS (平台即服務) 不同，K8s 的職責是「部署和運行容器」，它不包含從原始碼建置 (build) 容器映像檔的功能。不過，您可以透過整合 CI/CD 工具（如 Jenkins, GitLab CI）來自動化這個流程。
 
-### Does not provide nor adopt any comprehensive machine configuration, maintenance, management, or self-healing systems.
+### K8s 不提供應用程式級別的服務
 
-這講的是 k8s 不會提供 node 的維護, 他只負責 container (就跟 docker 一樣)  
-所以你在各大公有雲上面會看到各自的 distribution 來讓 k8s 能夠順利執行  
-  
-### Additionally, Kubernetes is not a mere orchestration system. 
-In fact, it eliminates the need for orchestration. The technical definition of orchestration is execution of a defined workflow: first do A, then B, then C. In contrast, Kubernetes comprises a set of independent, composable control processes that continuously drive the current state towards the provided desired state. It shouldn't matter how you get from A to C. Centralized control is also not required. This results in a system that is easier to use and more powerful, robust, resilient, and extensible.
+> Does not provide application-level services.
 
-  舉例來說 我們在佈署一個 app A, 他須要先有 DB 才能夠正常執行  
-  所以正常部屬流程上會是 '啟動 DB ' > '啟動 app A'  
-  但在 k8s 上卻是同時啟動  並各自維護狀態  
-  這樣系統才更易於使用、更強大、更穩健、更有彈性和可擴展性。  
+K8s 負責的是容器的生命週期管理，它不直接提供應用程式執行所需的依賴項，例如中介軟體 (middleware)、資料庫 (database) 或快取 (cache) 服務。您需要自行將這些服務容器化，並部署到 K8s 叢集中。
+
+### K8s 不強制指定日誌、監控或警報解決方案
+
+> Does not dictate logging, monitoring, or alerting solutions.
+
+K8s 本身不包含完整的日誌、監控和警報系統，但它提供了整合這些系統的機制。您可以根據團隊的需求，自由選擇和整合各種開源或商業解決方案，如 Prometheus、Grafana、ELK Stack 等。
+
+### K8s 不提供或強制使用特定的組態語言/系統
+
+> Does not provide nor mandate a configuration language/system (for example, Jsonnet). It provides a declarative API that may be targeted by arbitrary forms of declarative specifications.
+
+K8s 提供的是一個宣告式的 API。雖然 YAML 是最常見的設定檔格式，但您也可以使用其他工具或語言來生成符合 K8s API 規格的設定。
+
+### K8s 不提供全面的機器配置、維護或自我修復系統
+
+> Does not provide nor adopt any comprehensive machine configuration, maintenance, management, or self-healing systems.
+
+K8s 專注於管理容器，而非底層的主機 (Node)。它不會處理作業系統的更新、安全修補或硬體維護。這就是為什麼在各大公有雲上，您會看到像 GKE、EKS、AKS 這樣託管式的 Kubernetes 服務，它們幫助您管理底層基礎設施。
+
+### K8s 不僅僅是一個編排系統
+
+> Additionally, Kubernetes is not a mere orchestration system. In fact, it eliminates the need for orchestration. The technical definition of orchestration is execution of a defined workflow: first do A, then B, then C. In contrast, Kubernetes comprises a set of independent, composable control processes that continuously drive the current state towards the provided desired state. It shouldn't matter how you get from A to C. Centralized control is also not required. This results in a system that is easier to use and more powerful, robust, resilient, and extensible.
+
+傳統的「編排 (Orchestration)」是指按照一個預先定義好的工作流程來執行任務：先做 A，再做 B，然後做 C。
+
+而 K8s 的運作方式完全不同。它採用的是一種「協調 (Choreography)」模式。您只需要向 K8s 宣告「最終我想要達到的狀態」，K8s 內部一系列獨立的控制器 (Controller) 就會協同工作，不斷地將系統的「當前狀態」調整為您所宣告的「期望狀態」。它不關心從 A 到 C 的過程，也不需要一個中央集權的控制器。
+
+舉例來說，假設我們要部署一個需要資料庫的應用程式 `App A`。在傳統的編排系統中，流程會是「先啟動 DB」->「再啟動 App A」。但在 K8s 中，您可以同時宣告 DB 和 App A 的期望狀態，K8s 會並行地啟動它們，並透過內建的機制（如 Readiness Probes）確保 App A 在 DB 準備就緒後才開始接收流量。
+
+這種設計使得 K8s 系統更易於使用、更強大、更穩健、更有彈性和可擴展性。
 
 ---
-以上就是 k8s 的 overview  
-在大概知道 k8s 後,就能比較輕易了解每個功能他能/要做什麼了  
+
+以上就是 Kubernetes 的概念總覽。在對 K8s 有了整體的認識後，相信您能更容易地理解後續章節中各個功能的用途和設計理念。

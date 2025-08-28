@@ -9,38 +9,49 @@ weight: 26
 ![alt](images/banner.png)  
 
 <!--more-->
-[doc link](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)   
+[doc link](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)
 
-k8s 是 cluster 架構,意味他能夠管理很多 node  
-但是 node 之間可能存在些許差異  
-比如說不同的 CPU/memory/disk/availability zone  
+## 為什麼需要控制 Pod 調度？
 
-因此 k8s 能設定一些 constraints 來調整 pod 要使用哪些 node   
-所有的一切都是依靠 node 上面設定的 label 來做決定  
-通常來說會用 group 方式來設定 label(多個 node 有相同 label)  
-比如說 A,B,C 主機是 az=1  
-比如說 D,E,F 主機是 az=2  
+在一個典型的 Kubernetes (K8s) 叢集中，節點 (Node) 之間往往存在差異。有些節點可能擁有更強大的 CPU、配備了 GPU，或者位於特定的可用區 (Availability Zone)。
 
+預設情況下，K8s Scheduler 會嘗試在所有可用的節點上平均地分佈 Pod。但有時，我們需要更精細地控制，將特定的 Pod **指派**到特定的節點上，以滿足效能、高可用性或成本等方面的需求。
 
-- nodeSelector  
-  直接指定符合 label 的 node, 最簡單的使用方式  
-- Affinity and anti-affinity  
-  與 nodeSelector 比起來更有彈性, 除了硬性(hard) 規則必須滿足 label 條件外  
-  也可以使用軟性(soft) 規則, 即便不滿足也允許使用 node, 來提昇彈性  
-- nodeName  
-  直接指定 node  
-- Pod topology spread constraints  
-  預設情況下 replica 會平均 place 在多個 node 上  
-  這邊可以規定要分 AZ or 怎麼"平均" place 在多個 node 上  
-  算進階需求  
-  
-個人的建議是使用 Affinity  
-因為使用上較彈性  
+K8s 提供了一套從簡單到複雜的工具箱，來幫助我們實現這個目標。
 
+| 調度機制 | 靈活性 | 表達能力 | 約束類型 | 推薦度 |
+| :--- | :--- | :--- | :--- | :--- |
+| `nodeName` | 差 | 極低 | 硬性 | ⭐ (不推薦) |
+| `nodeSelector` | 中 | 低 | 硬性 | ⭐⭐ (簡單場景可用) |
+| **Affinity / Anti-Affinity** | **高** | **高** | **硬性 + 軟性** | ⭐⭐⭐⭐⭐ **(推薦)** |
 
-## nodeSelector
+## Level 1: `nodeName` (不推薦)
+這是最簡單、也是最不靈活的方式。您可以直接在 Pod 的 `.spec` 中指定 `nodeName`，強制將 Pod 調度到該節點上。
 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  nodeName: kube-01 # 直接綁定到 kube-01 節點
+```
+**缺點**：這種方式完全繞過了 Scheduler，如果指定的節點不存在或資源不足，Pod 將會調度失敗。它缺乏彈性，應盡量避免在生產環境中使用。
+
+## Level 2: `nodeSelector` (簡單易用)
+`nodeSelector` 提供了一種基於**節點標籤 (Node Labels)** 來選擇目標節點的簡單方法。您只需要為節點打上標籤，然後在 Pod 的 `.spec` 中指定這些標籤即可。
+
+**步驟 1：為 Node 打上標籤**
 ```bash
+# 為 node-1 加上一個標籤 disktype=ssd
+kubectl label nodes node-1 disktype=ssd
+```
+
+**步驟 2：在 Pod 中使用 `nodeSelector`**
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -50,34 +61,20 @@ spec:
   - name: nginx
     image: nginx
   nodeSelector:
-    atchitecture: arm64
+    disktype: ssd # 只選擇帶有 disktype=ssd 標籤的節點
 ```
+Scheduler 只會將這個 Pod 調度到同時滿足所有指定標籤的節點上。這是一種**硬性約束 (hard requirement)**。
 
-使用很簡單  
-就是設定 key-value 指定 label  
-只有都符合的 node 才會被 place pod  
+## Level 3: Affinity / Anti-Affinity (強大靈活)
+`Affinity` (親和性) 和 `Anti-Affinity` (反親和性) 是 `nodeSelector` 的超集，它們提供了更強大、更富表達力的調度規則。
 
-## Affinity and anti-affinity  
-affinity 能夠設定更多條件  使用上會更有彈性  
-Affinity 又細分  
-Node affinity  
-Inter-pod affinity/anti-affinity  
+### Node Affinity (節點親和性)
+讓您可以根據節點上的標籤來「吸引」Pod。它分為兩種約束：
+-   **`requiredDuringSchedulingIgnoredDuringExecution` (硬性約束)**：規則**必須**被滿足，否則 Pod 不會被調度。
+-   **`preferredDuringSchedulingIgnoredDuringExecution` (軟性約束)**：Scheduler 會**盡力**滿足規則，但如果無法滿足，仍然會將 Pod 調度到其他節點上。您可以為不同的偏好設定**權重 (weight)**。
 
-## Node affinity 
-就是指定 node  
-其中又分 required(hard) 與 preferred(soft)  
-
-而設定參數超級長... `requiredDuringSchedulingIgnoredDuringExecution` and `preferredDuringSchedulingIgnoredDuringExecution`  
-
-基本上看開頭 required 與 preferred 即可了解差異  
-而這兩者又可以組合使用  
-直接看範例  
-
-```bash
-apiVersion: v1
-kind: Pod
-metadata:
-  name: with-affinity-preferred-weight
+**範例**：要求 Pod 必須運行在 Linux 節點上，並且優先選擇帶有 `label-2=key-2` 標籤的節點。
+```yaml
 spec:
   affinity:
     nodeAffinity:
@@ -89,98 +86,55 @@ spec:
             values:
             - linux
       preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 1
-        preference:
-          matchExpressions:
-          - key: label-1
-            operator: In
-            values:
-            - key-1
-      - weight: 50
+      - weight: 100
         preference:
           matchExpressions:
           - key: label-2
             operator: In
             values:
             - key-2
-  containers:
-  - name: with-node-affinity
-    image: registry.k8s.io/pause:3.8
- ```
+```
 
-範例因為設定 `requiredDuringSchedulingIgnoredDuringExecution`  
-因此只有 label `kubernetes.io/os=linux` 的 node 才會被 place  
-然後 preferredDuringSchedulingIgnoredDuringExecution 又設定兩個不同的權重(weight)  
-由於 `label-2=key-2` 權重較高, 因此會偏好使用符合此 label 的 node  
+### Inter-pod Affinity / Anti-Affinity (Pod 間的親和/反親和性)
+這是更進階的功能，它允許您根據**已經在節點上運行的 Pod 的標籤**來決定新 Pod 的調度位置。
 
-另外 operator 用法可以參考 [doc](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#operators) 
+```mermaid
+graph TD
+    subgraph Node A
+        P1[Pod <br> `app=db`]
+        P2[Pod <br> `app=api`]
+    end
+    subgraph Node B
+        P3[Pod <br> `app=db`]
+    end
 
+    New_API[New API Pod] -- "podAffinity: `app=db`" --> P1
+    New_DB[New DB Pod] -- "podAntiAffinity: `app=db`" --> NodeB_alt[Any Node except A and B]
 
-### Inter-pod affinity and anti-affinity 
-node affinity 是根據 node label 決定 place  
-pod affinity 則是根據 pod label  
-舉例來說 會希望 app 跟 DB 這兩個 pod 住在同個 AZ 下甚至同個 node, 來降低 network overhead  
-或是希望避開不同 DB 在同個 node, 提昇高可用性  
-> 由於該設定是比對 pod label, 會造成 scheduler 很大 loading  
-> 官方建議 cluster node 大於 1000 時不要使用  
+    linkStyle 0 stroke:green,stroke-width:2px;
+    linkStyle 1 stroke:red,stroke-width:2px;
+```
 
-一樣用範例解釋  
+-   **Pod Affinity (親和性)**：將 Pod 調度到與特定 Pod **相同**的拓撲域（如節點、可用區）。
+    -   **用途**：將需要頻繁通訊的前端和後端 Pod 部署在同一個節點上，以降低網路延遲。
+-   **Pod Anti-Affinity (反親和性)**：**避免**將 Pod 調度到與特定 Pod 相同的拓撲域。
+    -   **用途**：為了高可用性，將同一個應用的多個副本分散到不同的節點或可用區，以避免單點故障。
 
-```bash
-apiVersion: v1
-kind: Pod
-metadata:
-  name: with-pod-affinity
+**範例**：要求此 Pod **不要**與任何帶有 `app=redis` 標籤的 Pod 部署在同一個節點上。
+```yaml
 spec:
   affinity:
-    podAffinity:
+    podAntiAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
       - labelSelector:
           matchExpressions:
-          - key: security
+          - key: app
             operator: In
             values:
-            - S1
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: security
-              operator: In
-              values:
-              - S2
-  containers:
-  - name: with-pod-affinity
-    image: registry.k8s.io/pause:3.8
+            - redis
+        topologyKey: "kubernetes.io/hostname"
 ```
-
-由於 podAffinity required 的關係  
-pod 必須跟 label 含有 security=S1 的 pod 住在同個 node 上  
-
-由於 podAntiAffinity preferred 的關係  
-pod 會偏好避免跟 label 含有 security=S2 的 pod 住在同個 node 上  
-
-## nodeName
-
-```bash
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nginx
-spec:
-  containers:
-  - name: nginx
-    image: nginx
-  nodeName: kube-01
-```
-
-使用很簡單  
-就是設定 node name
-
+-   `topologyKey`：定義了「相同拓撲域」的範圍。`kubernetes.io/hostname` 表示「同一個節點」。
 
 ---
-
-以上能夠讓我們決定 pod 該住在哪個 node 上  
-是很常用的需求  
+總結來說，K8s 提供了多層次的調度工具。在絕大多數情況下，**`Node Affinity`** 和 **`Pod Anti-Affinity`** 的組合，是實現高效、高可用應用程式部署的最佳實踐。

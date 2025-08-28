@@ -9,122 +9,100 @@ weight: 25
 ![alt](images/banner.png)  
 
 <!--more-->
-[doc link](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)   
+[doc link](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
 
+## 為什麼需要資源管理？
 
-Resource Management 是一個很重要的設定  
-在 k8s 中 scheduler 會負責指定 pod 要執行在哪個 node 上  
-萬一某個 node 非常 busy, scheduler 又持續將 pod place 在該 node 上   
-就會導致效率不佳, 或者 pod 根本起不來, 甚至搞垮整 node   
+在 Kubernetes (K8s) 中，適當的資源管理是維持叢集穩定和高效運作的基石。如果沒有為 Pod 設定資源，可能會發生以下情況：
 
-因此 resources 設定非常重要, 一定要設定  
+-   **調度不均**：Scheduler (排程器) 無法得知 Pod 的資源需求，可能會將大量 Pod 塞到同一個 Node 上，導致該 Node 過載，而其他 Node 卻很空閒。
+-   **資源搶佔**：某個 Pod 可能會無限制地消耗 CPU 或 Memory，導致同一 Node 上的其他重要 Pod 無法正常運作，甚至造成整個 Node 當機。
+-   **核心服務不穩**：當 Node 資源耗盡時，K8s 會開始驅逐 (Evict) Pod 以回收資源。如果沒有妥善設定，您的核心應用程式可能會被優先驅逐。
 
-resources 分為 request/limit  
-兩者底下都可以設定 cpu/memory  
+因此，**強烈建議為所有在生產環境中運行的 Pod 設定資源**。
 
-- **request:**  
-保留 resource 給 pod  
-一個 node 有多少 cpu/memory 會紀錄該 node 有多少 capacity  
-當 scheduler place pod 時 會根據設定的 request 做安排  
-當 pod place 到 node 時 該 node capacity 就會減去 pod request 藉此得知 node resource 剩餘狀況  
-作為下次 scheudler place pod 的考慮條件   
-因此可以避免 node resource 耗盡時, scheduler 依舊 place pod 到該 node  
-**但要強調 request 並非強制保留 resource 給該 pod**  
-其他 pod 是允許使用這些 resource 的  
+## 核心概念：Requests vs. Limits
 
-- **limit:**
-限制 pod 可用 resource  
-與 request 不同, limit 是 enforce 限制  
-pod 會無法使用超出 limit 的 resource  
+K8s 透過兩個參數來管理容器的資源：`requests` 和 `limits`。
 
+| 參數 | 餐廳比喻 | 作用 |
+| :--- | :--- | :--- |
+| **Requests** | 預約座位 | **用於 Pod 調度**：向 K8s **預約**資源。Scheduler 會確保 Node 上有足夠的「可分配資源」來滿足 Pod 的 `requests` 總和，才會將 Pod 調度到該 Node。 |
+| **Limits** | 座位大小 | **用於資源限制**：設定 Pod 可使用的資源**天花板**。防止 Pod 無限制地佔用資源，影響到同一 Node 上的其他 Pod。 |
 
-> 如果設定 request 但沒有設定 limit  
-> 那 limit 為空, pod 允許使用無上限的 resource  
-
-> 如果設定 limit 但沒有設定 request  
-> 那 request 會等於 limit  
-
-> 如果 limit/request 都有設定  
-> 那 limit 必須 >= request  
-
-
-## cpu 
-cpu 的設定單位是 core  
-
-1 就是 1 core  
-0.5 500m 就是 0.5 core  
-> m = one hundred millicpu
-> 1m 是最小單位
-
-
-## memory
-memory 的設定單位是 byte  
-可以使用十進制單位 E, P, T, G, M, k
-或是 2 進制單位 Ei, Pi, Ti, Gi, Mi, Ki
-
-> 莫名前妙的點  
-> k8s 有辦法設定小於 1 byte 的設定 支援的單位 [eEinumkKMGTP]  
-> 可以參考 [metric prefix](https://en.wikipedia.org/wiki/Metric_prefix)  
-> 如果設定 400m 等於 0.4 bytes, 到底誰用的到啦🤦🏻!!  
-> 因此大小寫有差別 千萬別設錯了  
-
-
-
-## How Kubernetes applies resource requests and limits
-
-基本重點  
-
-- cpu limit 頂到上限就是只能用這麼多, container 跑不快  
-- memory limit 頂到上限就是觸發 container OOM-killed  
-- cpu request 越大 container 會有較高的優先權執行  
-- memory limit 基本只影響 Pod scheduling   
-
-
-## sample config
-```bash
 ---
+
+### `requests`：調度的入場券
+
+-   `requests` 是 Scheduler 進行決策的主要依據。一個 Node 的可分配資源，就是其總容量減去所有已調度 Pod 的 `requests` 總和。
+-   **重要**：`requests` **並非強制保留**。它只是一個調度時的承諾。如果一個 Pod 實際使用的資源少於其 `requests`，那麼 Node 上空閒出來的這部分資源可以被其他 Pod 使用。
+
+### `limits`：資源使用的天花板
+
+-   `limits` 是由 `kubelet` 強制執行的硬性限制。
+-   **CPU**：如果容器嘗試使用超過 `limits.cpu` 的 CPU 資源，其使用量會被**節流 (Throttled)**，導致應用程式效能下降。
+-   **Memory**：如果容器嘗試使用超過 `limits.memory` 的記憶體，它會被系統以 **OOMKilled (Out of Memory Killed)** 的方式終止並重啟。
+
+### 規則與預設值
+
+1.  `limits` 必須大於或等於 `requests`。
+2.  如果只設定 `limits` 而未設定 `requests`，則 `requests` 會被自動設為與 `limits` 相同。
+3.  如果只設定 `requests` 而未設定 `limits`，則 Pod 可以使用該 Node 上所有的可用資源，直到 Node 資源耗盡。**這是一種危險的設定，應盡量避免。**
+
+## 資源單位詳解
+
+| 資源 | 單位 | 範例 | 說明 |
+| :--- | :--- | :--- | :--- |
+| **CPU** | Cores | `1` (1 個核心) <br> `0.5` (半個核心) <br> `500m` (500 millicores) | `m` 代表 `millicore` (千分之一核心)。`1000m` 等於 `1` 個核心。`1m` 是最小單位。 |
+| **Memory** | Bytes | `128974848` (bytes) <br> `129M` (megabytes) <br> `123Mi` (mebibytes) | 建議使用 2 的冪次方單位 (Ei, Pi, Ti, Gi, Mi, Ki) 以避免混淆。 |
+
+> **注意**：在設定 Memory 時，請注意大小寫。`m` (milli) 和 `M` (Mega) 代表的數量級天差地遠。
+
+## 服務品質 (QoS) 等級
+
+K8s 會根據您為容器設定的 `requests` 和 `limits`，自動為 Pod 分配一個**服務品質 (Quality of Service, QoS)** 等級。這個等級決定了當 Node 資源不足時，哪個 Pod 會被優先驅逐。
+
+| QoS 等級 | 設定條件 | 特性 | 驅逐順序 |
+| :--- | :--- | :--- | :--- |
+| **Guaranteed** | 所有容器都必須同時設定 `requests` 和 `limits`，且兩者的值**完全相等**。 | 擁有最高的優先級，資源得到完全保障。 | **最後**被驅逐 |
+| **Burstable** | 至少有一個容器設定了 `requests`，但 `requests` 和 `limits` 的值**不相等**。 | 可以超額使用資源 (burst)，但資源不被完全保障。 | **第二**順位被驅逐 |
+| **BestEffort**| 所有容器都**沒有**設定任何 `requests` 或 `limits`。 | 優先級最低，沒有任何資源保障。 | **最先**被驅逐 |
+
+**這就是為什麼設定 `requests` 和 `limits` 如此重要**：透過將核心服務設定為 `Guaranteed`，您可以確保在極端情況下，它們會是最後被系統犧牲的對象，從而保障了服務的穩定性。
+
+## 設定範例
+
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: frontend
+  name: qos-demo
 spec:
   containers:
-  - name: app1
-    image: images.my-company.example/app:v4
+  - name: guaranteed-container
+    image: my-app
+    # QoS: Guaranteed (requests == limits)
     resources:
       requests:
-        memory: "64Mi"
+        memory: "200Mi"
         cpu: "500m"
       limits:
-        memory: "128Mi"
-        cpu: "1"
-  - name: app2
-    image: images.my-company.example/app:v4
+        memory: "200Mi"
+        cpu: "500m"
+  - name: burstable-container
+    image: my-app
+    # QoS: Burstable (requests != limits)
     resources:
       requests:
-        memory: "64Mi"
-        cpu: "1"
+        memory: "100Mi"
+        cpu: "250m"
       limits:
-        memory: "128Mi"
-        cpu: "2"
+        memory: "200Mi"
+        cpu: "1"
 ```
 
-由於 pod 內的 container 必須要在同一 node 上  
-因此 scheduler 會找 node capacity 足夠放入所有 container 的 mode  
-
-另外前面強調過 request 沒有強制保留  
-因此如果 node 只有 2 core  
-
-是可以執行該 pod (total request 1.5 core)  
-但是如果 container app2 需要消耗 2 core  
-那他是可以用超過 1.5 core 的 (node 2 core - container app1 0.5 core )
-假設 app1 只消耗 0.1 core  
-app request 剩下 0.4 core
-app2 如果需要消耗 1.9 core , app2 是可以使用的  
-
+在這個範例中，如果 Node 資源耗盡，K8s 會先驅逐 `burstable-container` 所在的 Pod（如果它是 `Burstable` 或 `BestEffort` 等級），而 `guaranteed-container` 所在的 Pod 則會受到保護。
 
 ---
 
-以上是 resource 設定說明  
-由於會影響到 node 是否會超過負荷  
-因此用 k8s 的人務必要設定此參數  
+總結來說，資源管理不僅是關於限制，更是關於**溝通**。透過 `requests` 和 `limits`，您向 K8s 清楚地傳達了應用程式的需求和容忍度，而 K8s 則根據這些資訊，為您做出最合理的調度與資源分配決策，共同維護整個叢集的健康與穩定。

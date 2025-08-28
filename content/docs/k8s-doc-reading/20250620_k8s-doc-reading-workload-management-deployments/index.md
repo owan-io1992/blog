@@ -3,52 +3,60 @@ date: 2025-06-20T10:46:00
 draft: false
 tags:
 - k8s-reading
-title: "Concepts - Workload Management - deployments"
+title: "Workload - Deployments (無狀態應用)"
 weight: 8
 ---
 ![alt](images/banner.jpeg)  
 
 <!--more-->
-[doc link](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)   
+[doc link](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 
-Deployment 是用來幫助執行 stateless 的 pod   
-**stateless:**  
-- 在 pod 的 replica 之間 不存在任何關聯  
-- pod 在 start/restart/stop 後也不存在前後關聯  
+## 為什麼需要 Deployment？
 
-簡單來說 每個 pod 都是個獨立運作的個體  
+在 Kubernetes (K8s) 中，雖然 Pod 是最小的部署單位，但我們幾乎從不直接建立 Pod。為什麼？因為單獨的 Pod 是「脆弱」的。如果它所在的節點故障，或者 Pod 本身因錯誤而退出，它就會永遠消失。
 
-舉例來說 web-server 就適合使用 deployment  
+這就是 **Deployment** 的價值所在。Deployment 是 K8s 中用來管理**無狀態 (Stateless)** 應用程式最常用的物件。它的核心職責是：
 
+1.  **狀態維護**：確保在任何時候，都有指定數量的、健康的 Pod 副本在運行。
+2.  **生命週期管理**：提供一套聲明式的方法來進行應用程式的更新、回滾和擴展。
 
+您可以將 Deployment 想像成一位盡責的管家。您只需要告訴他您的「期望狀態」（例如：我需要 3 個 nginx 服務），Deployment Controller 就會持續地監控並調整系統，確保現實世界永遠符合您的期望。
 
-## Creating a Deployment
+## Deployment 的結構與運作
 
-在前面我們使用 範例去新增一個 deployment  
-```bash
-kubectl apply -f https://k8s.io/examples/controllers/nginx-deployment.yaml
+Deployment 的背後，其實是由 **ReplicaSet** 來完成實際的 Pod 管理工作。它們之間的關係如下：
+
+```mermaid
+graph TD
+    A[Deployment] -- "創建/管理" --> B(ReplicaSet);
+    B -- "維持 Pod 副本數" --> C((Pod));
+    B -- "維持 Pod 副本數" --> D((Pod));
+    B -- "維持 Pod 副本數" --> E((Pod));
 ```
+-   **Deployment**：定義了應用的期望狀態，例如副本數、容器映像檔、更新策略等。
+-   **ReplicaSet**：確保在任何時候都有指定數量的 Pod 副本在運行。我們通常不直接操作它，而是交由 Deployment 來管理。
+-   **Pod**：真正運行您應用程式的單位。
 
-為了方便說明  
-我直接使用註解做講解  
-有一些功能尚未介紹到 就請大家邊看邊學 後面會再做深入介紹  
-```bash
-apiVersion: apps/v1 # k8s 是跟 api server 溝通, api 版本會跟著 k8s 升級做異動, 因次升級務必做檢查
-kind: Deployment # 告訴 k8s 要建立 deployment
-metadata: 
+### YAML 範例解析
+
+讓我們來解析一個典型的 Deployment YAML 檔：
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: nginx-deployment
-  labels: # k8s 在不同 resource 都是透過 labels 去建立關係 
-    app: nginx
-spec: # 開始定義 deployment 內容
-  replicas: 3  # 宣告要建立一個 3 個 replica 的 ReplicaSet
-  selector:    # ReplicaSet 的 labels
+  labels:
+    app: nginx # 1. Deployment 自身的標籤
+spec:
+  replicas: 3
+  selector:
     matchLabels:
-      app: nginx
-  template:    # how ReplicaSet create pod
+      app: nginx # 2. Selector，用來尋找要管理的 Pod
+  template: # Pod 的模板
     metadata:
-      labels:  # pod's labels
-        app: nginx
-    spec:  # 開始定義 pod 內容
+      labels:
+        app: nginx # 3. Pod 模板的標籤，必須與 Selector 匹配
+    spec:
       containers:
       - name: nginx
         image: nginx:1.14.2
@@ -56,238 +64,91 @@ spec: # 開始定義 deployment 內容
         - containerPort: 80
 ```
 
-實際操作可以使用官方提供的 manifest 新增一個 deployment  
-```bash
-kubectl apply -f https://k8s.io/examples/controllers/nginx-deployment.yaml
-```
+### `Labels` 與 `Selector`：串起一切的關鍵
+`Labels` 是 K8s 中用來組織和選擇物件的關鍵。在 Deployment 中，有三個地方的 `labels` 和 `selector` 需要特別注意：
 
-然後觀察狀態  
-```bash
-$ k get deployment
-NAME               READY   UP-TO-DATE   AVAILABLE   AGE
-nginx-deployment   3/3     3   
-```
-
-deployment 就是其中一種 workload resource or 又稱 kind   
-nginx-deployment 稱之為 object
-
-記得前面有提到, 我們不直接建立 pod 而是透過 workload resources  
-這個 yaml 是宣告建立一個 kind 是 deployment 的 object  
-`.spec.template` 則是建立 ReplicaSet, 另一個 workload resources   
-ReplicaSet 則會建立 pod  
-> 基本上我們不會直接使用 ReplicaSet  
-
-關係如下  
-```mermaid
-flowchart TD
-    A[Deployment] -- 控制與管理 --> B(ReplicaSet)
-    B -- 建立並維持副本數量 --> C((Pod 1...n))
-```
-
-**關於 label**  
-k8s 的 label 是很重要的觀念  
-label 用於建立 k8s 不同 object 之間的關係  
-藉由指定 label 就可以到找對應的 object (一或多個)  
-這邊來說明這裡所用到的 label  
-`.metadata.labels` 是提供給要使用 deplyment 的人使用  
-舉例 只讓 kubectl 顯示符合 label 的 deplyment object 
-```
-$ k get deplyment --selector=app=nginx
-NAME               READY   UP-TO-DATE   AVAILABLE   AGE
-nginx-deployment   3/3     3            3           13m
-```
-
-`.spec.selector.matchLabels`
-告訴 ReplicaSet 如何找到 pod 去納管  
-
-`.spec.template.metadata.labels`
-指定建立 pod 時該有的 label  
+| 位置 | 作用 |
+| :--- | :--- |
+| `1. metadata.labels` | Deployment 物件本身的標籤，方便我們透過 `kubectl get deploy -l app=nginx` 來篩選和管理 Deployment。 |
+| `2. spec.selector` | **最關鍵的設定**。Deployment 透過這個 `selector` 來識別哪些 Pod 是歸它管理的。 |
+| `3. spec.template.metadata.labels` | Pod 模板的標籤。這裡設定的標籤**必須**與 `spec.selector` 相匹配，Deployment 才能正確地找到它所建立的 Pod。 |
 
 
+## 更新策略 (Update Strategy)
 
-READY: 目標要三個 replica 並都已正常啟動
-UP-TO-DATE: 顯示如果有任何 pod 已更新完成(如有進行 rolling update 可以觀察此項目) 
+Deployment 最強大的功能之一，就是提供了優雅的應用程式更新機制。
 
-如要觀察詳細資訊 就使用 `describe`  
-```
-$ k describe deploy nginx-deployment 
-Name:                   nginx-deployment
-Namespace:              default
-CreationTimestamp:      Sat, 21 Jun 2025 00:53:33 +0000
-Labels:                 app=nginx
-Annotations:            deployment.kubernetes.io/revision: 2
-Selector:               app=nginx
-Replicas:               3 desired | 3 updated | 3 total | 3 available | 0 unavailable
-StrategyType:           RollingUpdate
-MinReadySeconds:        0
-RollingUpdateStrategy:  25% max unavailable, 25% max surge
-Pod Template:
-  Labels:       app=nginx
-  Annotations:  kubectl.kubernetes.io/restartedAt: 2025-06-21T00:58:03Z
-  Containers:
-   nginx:
-    Image:         nginx:1.14.2
-    Port:          80/TCP
-    Host Port:     0/TCP
-    Environment:   <none>
-    Mounts:        <none>
-  Volumes:         <none>
-  Node-Selectors:  <none>
-  Tolerations:     <none>
-Conditions:
-  Type           Status  Reason
-  ----           ------  ------
-  Available      True    MinimumReplicasAvailable
-  Progressing    True    NewReplicaSetAvailable
-OldReplicaSets:  nginx-deployment-647677fc66 (0/0 replicas created)
-NewReplicaSet:   nginx-deployment-756d74bd9 (3/3 replicas created)
-Events:
-  Type    Reason             Age    From                   Message
-  ----    ------             ----   ----                   -------
-  Normal  ScalingReplicaSet  5m59s  deployment-controller  Scaled up replica set nginx-deployment-647677fc66 from 0 to 3
-  Normal  ScalingReplicaSet  89s    deployment-controller  Scaled up replica set nginx-deployment-756d74bd9 from 0 to 1
-  Normal  ScalingReplicaSet  88s    deployment-controller  Scaled down replica set nginx-deployment-647677fc66 from 3 to 2
-  Normal  ScalingReplicaSet  88s    deployment-controller  Scaled up replica set nginx-deployment-756d74bd9 from 1 to 2
-  Normal  ScalingReplicaSet  87s    deployment-controller  Scaled down replica set nginx-deployment-647677fc66 from 2 to 1
-  Normal  ScalingReplicaSet  87s    deployment-controller  Scaled up replica set nginx-deployment-756d74bd9 from 2 to 3
-  Normal  ScalingReplicaSet  86s    deployment-controller  Scaled down replica set nginx-deployment-647677fc66 from 1 to 0
-```
+### 滾動更新 (Rolling Update) - 預設策略
+這是 K8s 預設的更新策略，它能確保在更新過程中服務不中斷。其行為可以透過以下兩個參數來微調：
 
+-   `maxSurge`：在更新過程中，允許比期望副本數**多出**的 Pod 數量。例如，`replicas: 10`, `maxSurge: 25%`，則更新時最多可以有 `10 + 3 = 13` 個 Pod。
+-   `maxUnavailable`：在更新過程中，允許**無法提供服務**的 Pod 最大數量。例如，`replicas: 10`, `maxUnavailable: 25%`，則更新時至少要有 `10 - 2 = 8` 個 Pod 處於可用狀態。
 
-## Updating a Deployment 
-> 這邊操作有印象即可  
-> 實務來說  我們不會這樣使用   
-> 通常會使用 IaC 來進行操作  
-
-修改 image tag  
-```bash
-$ kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1
-deployment.apps/nginx-deployment image updated
-```
-
-這時 deployment 會幫我們進行 rolling update  
-非常的簡單  
-那如果我設定有問題的 image 呢？ 
-```bash
-$ kubectl set image deployment/nginx-deployment nginx=nginx:1.16.123
-deployment.apps/nginx-deployment image updated
-```
-
-你還是會看到 deployment 顯示 image updated  
-但是去看 pod 的狀態  
-```bash
-$ k get pod 
-NAME                                READY   STATUS         RESTARTS   AGE
-nginx-deployment-7d7b5bf757-vqm98   0/1     ErrImagePull   0          15s
-nginx-deployment-85c89744b4-ddc2p   1/1     Running        0          2m4s
-nginx-deployment-85c89744b4-t7qss   1/1     Running        0          105s
-nginx-deployment-85c89744b4-wsdzg   1/1     Running        0          104s
-
-$ k get deployment
-NAME               READY   UP-TO-DATE   AVAILABLE   AGE
-nginx-deployment   3/3     1            3           12m
-
-```
-
-因為這 tag 並不存在  
-因此 pod STATUS 為 ErrImagePull   
-deployment 會因為 pod 起不來  因此沒有繼續更新  
-在新的 pod 尚未能運作前, deployment 並不會把舊的 pod 停掉  
-因此一個簡易的 canary deploy 就出現了  
-
-但也要注意一件事當我們對 deplyment set image 時  
-並不會拿到一個 fail 的狀態   
-因為會需要不斷的使用 get pod 觀察 update 狀態  
-這個問題可以透過 [argoCD](https://argo-cd.readthedocs.io/en/stable/) 解決  
-
-另外從 flow 來看
-deployment 會先建立另一個 ReplicaSet  
-並逐步調整兩個 ReplicaSet 的 pod 數量   
-藉此來 rolling upgrade  
 ```mermaid
 graph TD
-    A[Deployment] -- 控制與管理 --> B1(ReplicaSet)
-    A[Deployment] -- 控制與管理 --> B2(ReplicaSet)
-    B1 -- 建立並維持副本數量 --> C1(("tag 1.16.1 
-    Pod 1...n-x"))
-    B2 -- 建立並維持副本數量 --> C2(("tag 1.16.2 
-    Pod 1...x"))
+    subgraph "更新前 (v1)"
+        direction LR
+        P1_1[Pod] --- P1_2[Pod] --- P1_3[Pod] --- P1_4[Pod]
+    end
+
+    subgraph "更新中 (maxSurge=1, maxUnavailable=1)"
+        direction LR
+        P1_1_down[Pod v1 <br> (Terminating)]
+        P1_2_run[Pod v1]
+        P1_3_run[Pod v1]
+        P1_4_run[Pod v1]
+        P2_1_new[Pod v2 <br> (Creating)]
+    end
+    
+    subgraph "更新後 (v2)"
+        direction LR
+        P2_1[Pod] --- P2_2[Pod] --- P2_3[Pod] --- P2_4[Pod]
+    end
+    
+    A[Start Update] --> B(Step 1: Scale down old, Scale up new) --> C(Step 2: Repeat) --> D[Finish]
+    B --> 更新中
+    更新前 --> A
+    D --> 更新後
+```
+透過這兩個參數的組合，K8s 會逐步地用新版本的 Pod 替換舊版本的 Pod，實現平滑的零停機更新。
+
+### 重建 (Recreate)
+這個策略比較暴力。它會先將所有舊版本的 Pod **全部終止**，然後再建立所有新版本的 Pod。這會導致服務在更新過程中出現短暫的中斷，適用於能容忍停機的應用程式。
+
+## Deployment 的日常操作
+
+> **注意**：在正式的生產環境中，強烈建議使用 GitOps (如 ArgoCD) 或 CI/CD Pipeline 來管理 Deployment 的變更，而不是手動執行 `kubectl` 指令。
+
+### 更新應用程式版本
+```bash
+# 將 nginx 容器的映像檔更新為 1.16.1
+kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1
 ```
 
-這樣也能夠理解 為什麼中間還要再過一層 ReplicaSet 了  
-
-## Rolling Back a Deployment update 
-
-> 這邊操作有印象即可  
-> 實務來說  我們不會這樣使用  
-> 通常會使用 IaC 來進行操作  
-
-k8s 會紀錄你的變更紀錄 (預設 10 份)  
-你可以使用
-
-```bash 
-# get update revision
+### 查看更新歷史與回滾
+K8s 會保存 Deployment 的變更歷史 (`revision`)。
+```bash
+# 查看更新歷史
 kubectl rollout history deployment/nginx-deployment
 
-# get detail update revision
+# 查看某個特定版本的詳細資訊
 kubectl rollout history deployment/nginx-deployment --revision=2
 
-# Rolling Back to a Previous Revision 
+# 回滾到上一個版本
+kubectl rollout undo deployment/nginx-deployment
+
+# 回滾到指定的版本
 kubectl rollout undo deployment/nginx-deployment --to-revision=2
 ```
 
-
-## Scaling a Deployment 
-
-如何修改範例的 replica 數量  
-可以使用  
-
+### 擴展與縮減副本數
 ```bash
+# 將副本數擴展到 10
 kubectl scale deployment/nginx-deployment --replicas=10
-```
 
-但平常我們都會採用 auto scale  
-因此人工 scale 只有在特殊狀況使用  
-
-比如說我想暫時把 deploymnet 停了  
-就可以使用 `--replicas=0` 而不必 delete replica  
-```bash
+# 將副本數縮減為 0，常用於臨時下線服務
 kubectl scale deployment/nginx-deployment --replicas=0
 ```
 
-## Failed Deployment 
-
-前面有故意將 images tag 改為 1.16.123  
-並看到 pod 出現 `ErrImagePull`  
-如果你使用 `k describe pod` 可以看到更多細節  
-
-這邊就不贅述所有狀態了  
-基本上養成善用 `describe` 來進行 debug 就是了  
-
-## update Strategy 
-預設情況下 k8s 採用 `RollingUpdate`  
-也就是逐步更新  
-可以使用 `Recreate`  
-來一次行更新所有 pod  
-
-### Rolling Update Deployment strategy  
-
-RollingUpdate 可以修改他的行為  
-default 情況下是  
-
-**maxUnavailable:** default 25%  
-允許 pod stop 的量  
-可以用絕對值 or 百分比  
-  
-當開始 rolling upgrade 時  
-舊的 replica 會馬上停掉 25%  
-
-**maxSurge:** default 25%  
-允許 pod start 的量  
-可以用絕對值 or 百分比  
-
-當開始 rolling upgrade 時  
-新增的 replica 會先啟動 25%  
-
-
-因此只要控制 maxUnavailable, maxSurge 即可控制 rolling upgrade 的流程  
+---
+Deployment 是您在 K8s 中最常打交道的物件之一。理解其宣告式的運作模型和強大的生命週期管理能力，是掌握 K8s 應用部署的關鍵第一步。

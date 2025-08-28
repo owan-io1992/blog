@@ -10,43 +10,31 @@ weight: 6
 
 <!--more-->
 
-[doc link](https://kubernetes.io/docs/setup/learning-environment/)  
+在學習了 Kubernetes (K8s) 的基本概念後，是時候動手實作了！本篇文章將引導您完成從無到有，建立一個本地的 K8s 實驗環境，並部署您的第一個應用程式。
 
-## Introduction
+## 選擇你的遊樂場：為什麼用 k3s？
 
-前面稍微介紹 k8s 後  
-先來個簡單的 getting start(LAB)  
-開始實際接觸 k8s  
-後面的介紹 就可以一邊學一邊實做下去了  
+要建立一個 K8s 叢集，社群提供了許多工具，但對於初學者來說，選擇一個**輕量、快速且功能完整**的工具至關重要。
 
-首先 k8s 有不同的 distibution 請參考 [distribution-compare](/posts/20250612_k8s-distribution-compare/)  
-這邊我們採用 k3s 作為 LAB 環境  
-他的優點是簡單且環境單純  
-可以讓我們後續學習更加順利  
+| 工具 | 優點 | 缺點 | 推薦度 |
+| :--- | :--- | :--- | :--- |
+| **k3s** | **極度輕量、安裝快速 (一條指令)、內建電池 (Ingress, Service LB)** | 社群相對較小 | ⭐⭐⭐⭐⭐ |
+| **minikube** | 官方推薦、功能豐富 | 基於 Docker/VM，網路和儲存層與生產環境有差異 | ⭐⭐⭐ |
+| **kind** | 快速建立多節點叢集、CI/CD 整合佳 | 同 minikube，底層依賴 Docker | ⭐⭐⭐ |
+| **kubeadm** | **最原生**、最能理解底層原理 | **安裝極度複雜**、耗時、容易出錯 | ⭐ (不推薦初學者) |
 
-那為什麼不直接用原生 k8s ?
-因為原生 k8s 安裝非常麻煩  
-順利安裝少說半小時起跳  
-因為步驟很多, 出錯機會也非常大 因此非常不建議使用  
+基於以上比較，本系列將採用由 Rancher (SUSE) 開發的輕量級 K8s 發行版 **[k3s](https://k3s.io/)** 作為我們的實驗環境。它移除了許多不必要的功能，將所有核心組件打包成一個小於 100MB 的執行檔，讓您可以在一分鐘內擁有一個功能齊全的 K8s 叢集。
 
-官方的 getting start 也不是採用原生 k8s  
-是使用 kind or minikube (唉 不是... getting start 你幹麻讓人選擇障礙啊啊啊)  
-但兩套我都不建議使用, 由於其 base 在 docker 環境底下  
-導致其部份功能會受到 docker 限制, 造成學習 k8s 會有限制  
-因此建議跟我一樣使用 k3s  
-detail 可見 [k3s introduction](/posts/20250612_k3s-introduction/)  
+### 安裝 k3s
+**前提**：準備一台 Linux 虛擬機 (建議 Ubuntu 24.04)，至少 2 Cores / 2GB RAM。
 
-## install k3s
-
-**Prerequisites**   
-a linux VM (best use ubuntu 24.04) with 2 core/2G RAM  
-
-**install**  
+**執行安裝腳本：**
 ```bash
-# install
+# 一鍵安裝 k3s，並設定 kubeconfig 權限為所有人可讀
 curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 
-# config for easy use k3s
+# 設定 alias 和自動補全，讓操作更方便
+# 這是 K8s 社群的通用慣例，'k' 就是 'kubectl' 的縮寫
 tee -a ~/.bashrc <<EOF
 source <(k3s kubectl completion bash)
 alias kubectl="k3s kubectl"
@@ -54,131 +42,78 @@ alias k="k3s kubectl"
 complete -o default -F __start_kubectl k
 EOF
 
+# 立刻讓設定生效
 source ~/.bashrc
 ```
 
-檢查 install status  
-如果 為 Ready 代表安裝完成  
+**驗證安裝：**
 ```bash
-k get node 
+$ k get node
 NAME    STATUS   ROLES                  AGE    VERSION
 node1   Ready    control-plane,master   112s   v1.32.5+k3s1
 ```
+看到節點狀態為 `Ready`，恭喜您，您的 K8s 遊樂場已經準備就緒！
 
-說明一下  
-前面有說過  
-不同 distribution add node 方式不同  
-因此前面(k8s doc reading: Concepts - Cluster Architecture: Node) 有說簡單了解即可  
-另外採用 k3s 我們也不會用到 `kubeadm`  
-所以這篇會跟官方的 getting start 有差異  
-
-前面提過  我們在操作 k8s 時  都是使用 `kubectl`  
-而 k3s cli 內建 kubectl 了  
-因此不必再另外安裝
-
-最後我們設定 alias `k="k3s kubectl"`  
-這是官方的小 tips [quick-reference](https://kubernetes.io/docs/reference/kubectl/quick-reference/) 
-
-畢竟這樣方便許多  
-許多人都是這樣使用 k8s  
-為了讓大家都能看懂別人在說什麼
-因此 `k` 就是指 `kubectl` 是基本常識   
-
-## deploy first app
-
-首先回憶 k8s 是採用 declarative configuration  
-也就是說 我們都是寫 config(yaml format) 給 k8s 看  
-對等就是 docker compose file    
-
-現在我們直接使用現成的 yaml 來部屬第一個 app 
+## Part 1：部署你的第一個應用 (Deployment)
+現在，讓我們來部署一個 NGINX 網站。我們將使用 `kubectl apply` 指令，並直接引用官方提供的 YAML 設定檔。
 
 ```bash
-$ k apply -f https://k8s.io/examples/controllers/nginx-deployment.yaml
-deployment.apps/nginx-deployment created
-```
+# 建立一個 Deployment 物件
+k apply -f https://k8s.io/examples/controllers/nginx-deployment.yaml
 
-這邊說明 我們在 k8s 建立了一個 `deployments.apps` 叫 `nginx-deployment`
-> deployments.apps 就是前面說的 deployments
-> 也可以用縮寫 deploy 
-
-觀察結果
-```bash
-$ k get deploy 
+# 查看 Deployment 的狀態
+$ k get deploy
 NAME               READY   UP-TO-DATE   AVAILABLE   AGE
 nginx-deployment   3/3     3            3           2m24s
 ```
+-   `k apply`：告訴 K8s 根據指定的 YAML 檔，建立或更新物件。
+-   `k get deploy`：查看 Deployment 的狀態。`READY 3/3` 表示我們期望的 3 個 Pod 副本都已經成功啟動並處於就緒狀態。
 
-這邊可以看到 READY: 3/3  
-代表我們起了 3 個 replica 並且已經啟動完成   
-
-我們可以用 `get pod` 加上 `-o wide` 看到更多訊息
-```bash
-$ k get pod -o wide 
-NAME                                READY   STATUS    RESTARTS   AGE     IP           NODE    NOMINATED NODE   READINESS GATES
-nginx-deployment-647677fc66-7htfr   1/1     Running   0          9m44s   10.42.0.10   node1   <none>           <none>
-nginx-deployment-647677fc66-ncs5s   1/1     Running   0          9m44s   10.42.0.9    node1   <none>           <none>
-nginx-deployment-647677fc66-p8627   1/1     Running   0          9m44s   10.42.0.11   node1   <none>           <none>
-```
-
-## expose app in cluster
-
-在前面我們讓 app(nginx) 起來了
-但是如果 cluster 內有其他 pod 要來 access app(nginx) 該怎麼做到的？  
-這時我們要用到 k8s 的 service (後面會介紹)  
+## Part 2：讓應用在叢集中被看見 (Service)
+雖然我們的 NGINX Pod 已經在運行，但它們目前是孤立的，叢集中的其他應用無法存取它們。為了讓它們能被「看見」，我們需要建立一個 **Service**。
 
 ```bash
-$ k apply -f https://k8s.io/examples/service/nginx-service.yaml
-service/nginx-service created
+# 建立一個 Service 物件
+k apply -f https://k8s.io/examples/service/nginx-service.yaml
 
+# 查看 Service 的狀態
 $ k get service
 NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
 nginx-service   ClusterIP   10.43.163.91   <none>        8000/TCP   13s
 ```
+-   **Service**：為一組功能相同的 Pod 提供一個**穩定**的、**單一**的存取入口。
+-   **`ClusterIP`**：這是 Service 的預設類型。它會建立一個僅能在**叢集內部**存取的虛擬 IP。現在，叢集內任何一個 Pod 都可以透過存取 `10.43.163.91:8000` 來訪問我們的 NGINX 服務，Service 會自動將流量負載平衡到後端的 3 個 NGINX Pod 之一。
 
-我們可以看到 k8s 提供了一個 ClusterIP  
-其他 pod 只要 access 這個 10.43.163.91:8000 就可以存取到 app(nginx)  
-且是 random 存取 3 個 app(nginx) pod  
-因此 replica 的應用在 k8s 是非常簡單能夠達成  
+## Part 3：將應用暴露到叢集外部
+`ClusterIP` 只能對內，如果我們想讓外部使用者也能看到我們的 NGINX 歡迎頁面，該怎麼辦？我們需要將 Service 的類型變更為 `LoadBalancer`。
 
-## expose app in host
-
-前面利用的 service 是讓 app(nginx) 能夠在 cluster 內部給其他 pod access  
-但如果是要給外部存取呢？  
-> ClusterIP/ pod IP 是一個 overlap IP  
-> 只有在 cluster 內部才能存取
-
-我們來編輯剛剛的 service 
-`k edit service nginx-service` 
-修改 spec.type 由 `ClusterIP` 改為 `LoadBalancer`  
-並存檔離開(default 是使用 vi 編輯器)  
-
-這時再看一次狀態 
+```bash
+# 使用 edit 指令直接編輯已存在的 Service
+# 這會開啟一個 vi 編輯器
+k edit service nginx-service
 ```
-$ k get service
+在編輯器中，找到 `spec.type` 這一行，將其值從 `ClusterIP` 改為 `LoadBalancer`，然後保存並退出。
+
+```bash
+# 再次查看 Service 狀態
+$ k get svc
 NAME            TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)          AGE
 nginx-service   LoadBalancer   10.43.163.91   192.168.56.101   8000:31509/TCP   15m
 ```
+-   **`LoadBalancer`**：這個 Service 類型會利用 K8s 所在環境的負載平衡器（在公有雲上是雲端 LB，在 k3s 中是內建的 [ServiceLB](https://docs.k3s.io/networking/service-load-balancer)），為您的服務分配一個可從**外部**存取的 IP 位址。
+-   **`EXTERNAL-IP`**：這就是我們可以從外部存取的 IP。
+-   **`PORT(S)`**：`8000:31509/TCP` 表示 Service 的 `8000` 埠號，被對應到節點上的 `31509` 埠號。
 
-可以看到 EXTERNAL-IP 有東西了
-這時只要用 browser 打開 `http://192.168.56.101:8000` 
-就可以看到結果了  
+現在，打開您的瀏覽器，訪問 `http://<YOUR-NODE-IP>:8000` (請將 `<YOUR-NODE-IP>` 替換為您 VM 的實際 IP)，您應該就能看到 NGINX 的歡迎頁面了！
+
 ![alt text](images/nginx.png)
 
-## cleanup 
-最後來把 lab 建立的 service/deployment 刪除
-
+## 清理戰場
+實驗結束後，使用 `delete` 指令來清理我們建立的物件。
 ```bash
-$ k delete service nginx-service
-service "nginx-service" deleted
-
-$ k delete deployments.apps nginx-deployment 
-deployment.apps "nginx-deployment" deleted
+k delete service nginx-service
+k delete deployment nginx-deployment
 ```
-## Conclusion
 
-快速的 LAB 操作之後  
-應該會對 k8s 的操作有基本認識  
-
-我們先不要了解 yaml (manifest) 的語法  
-這個要等到對 k8s 有更進一步認識後才會有辦法說明  
-接下來會就能一邊介紹 k8s 並同時有 LAB 環境讓大家實際上手演練了  
+---
+透過這個快速的實作，您已經體驗了 K8s 最核心的工作流程：**部署 (Deployment)** -> **對內暴露 (Service - ClusterIP)** -> **對外暴露 (Service - LoadBalancer)**。在接下來的章節中，我們將會深入探討每一個物件的細節。

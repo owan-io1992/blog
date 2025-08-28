@@ -9,209 +9,94 @@ weight: 29
 ![alt](images/banner.png)  
 
 <!--more-->
-[doc link](https://kubernetes.io/docs/concepts/overview/working-with-objects/)   
+[doc link](https://kubernetes.io/docs/concepts/overview/working-with-objects/)
 
+## K8s 的核心：萬物皆物件
 
-前面用過 manifest 後, 這邊來細部說明  
+在 Kubernetes (K8s) 的世界裡，**一切皆為物件 (Object)**。無論是您部署的應用程式 (Pod)、暴露服務的端點 (Service)，還是設定檔 (ConfigMap)，它們在 K8s 的視角中，都是一個個的 API 物件。
 
-object 就是我們設定進去 k8s 的內容, 舉凡 ingress/deployment...etc  
-而 object 我們都會用 yaml 檔紀錄, 稱為 manifest  
-當我們建立 object 後, k8s 會不斷工作來滿足 object 預期狀態   
-也就是說, k8s 的運作方式是讓他自動操作達到我們預期目標  
+我們透過向 K8s API Server 提交一個 YAML 或 JSON 格式的**設定檔 (Manifest)** 來操作這些物件。這個過程就像是向 K8s 提交一份「**願望清單**」。
 
+-   **`spec` (Specification)**：您在這份清單的 `spec` 欄位中，詳細描述您的「**期望狀態 (Desired State)**」。例如：「我想要一個名為 `nginx` 的 Deployment，它需要有 3 個副本，使用 `nginx:1.21` 的映像檔」。
+-   **`status`**：K8s 的各種控制器 (Controller) 會不斷地工作，努力將「**當前狀態 (Current State)**」調整為您所期望的狀態，並將結果回寫到該物件的 `status` 欄位中。
 
-每個 object 都必須擁有以下設定  
+理解 `spec` (您想要的) 和 `status` (實際上的) 之間的差異，是掌握 K8s 宣告式 API 的關鍵。
 
-- kind: 要建立的 kind 類型, 比如 deployment/statefulset..
-- apiVersion: 要使用 kind 的 API 版本, 除了影響功能, k8s 升即時也要注意使用中的 kind api version 是否有變, 否則功能失效就很麻煩了    
-- metadata: 幫助建立唯一識別, 或是其他輔助資訊. 比如 name,annotation,label,namespace
-- spec: 希望 k8s 要幫我們完成的內容,必須根據 kind 來設定
+## 物件的四大必填欄位
 
-範例
-``` {filename=deployment.yaml}
+每一個 K8s 物件的 Manifest，都必須包含以下四個頂層欄位：
+
+| 欄位 | 作用 | 範例 |
+| :--- | :--- | :--- |
+| `apiVersion` | 指定了建立此物件所使用的 K8s API 版本。 | `apps/v1` |
+| `kind` | 指定了您想要建立的物件種類。 | `Deployment`, `Service`, `ConfigMap` |
+| `metadata` | 包含了物件的元數據，用於唯一識別此物件。 | `name`, `namespace`, `labels`, `annotations` |
+| `spec` | 定義了此物件的「期望狀態」。 | `replicas`, `selector`, `template` |
+
+**範例：一個簡化的 Deployment 物件**
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "10"
-    meta.helm.sh/release-name: httpbin
-    meta.helm.sh/release-namespace: default
-  creationTimestamp: "2025-07-07T08:19:58Z"
-  generation: 10
-  labels:
-    app.kubernetes.io/instance: httpbin
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: httpbin
-    app.kubernetes.io/version: latest
-    helm.sh/chart: httpbin-0.1.7
-  name: httpbin
+  name: nginx-deployment
   namespace: default
-  resourceVersion: "108611"
-  uid: db429dbe-aaa1-4304-a8d3-da1532f9839e
 spec:
-  progressDeadlineSeconds: 600
-  replicas: 9
-  revisionHistoryLimit: 10
+  replicas: 3
   selector:
     matchLabels:
-      app.kubernetes.io/instance: httpbin
-      app.kubernetes.io/name: httpbin
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+      app: nginx
   template:
     metadata:
-      annotations:
-        kubectl.kubernetes.io/restartedAt: "2025-07-07T16:24:41+08:00"
-      creationTimestamp: null
       labels:
-        app.kubernetes.io/instance: httpbin
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: httpbin
-        app.kubernetes.io/version: latest
-        date: "1751878666"
-        helm.sh/chart: httpbin-0.1.7
+        app: nginx
     spec:
       containers:
-      - image: mccutchen/go-httpbin:latest
-        imagePullPolicy: IfNotPresent
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /anything/livenessProbe
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        name: httpbin
-        ports:
-        - containerPort: 8080
-          name: http
-          protocol: TCP
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /anything/readinessProbe
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        resources: {}
-        securityContext: {}
-        startupProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /anything/startupProbe
-            port: http
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      serviceAccount: httpbin
-      serviceAccountName: httpbin
-      terminationGracePeriodSeconds: 30
-      tolerations:
-      - operator: Exists
-
+      - name: nginx
+        image: nginx:1.21.0
 ```
 
+## 物件的身份證：`metadata` 詳解
 
-接著再針對某些設定提供更詳細用途
+`metadata` 欄位就像是每個物件的身份證，其中包含了幾個非常重要的子欄位。
 
-## Namespaces
-[doc link](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)   
+### `name` 和 `uid`
+-   `name`：在同一個 `namespace` 和 `kind` 下，`name` 必須是唯一的。
+-   `uid`：由 K8s 自動產生的、在整個叢集中真正獨一無二的 ID。
 
-namespace 是 k8s 用來將 resource 分不同 group  
-大部分 kind 都會分 namespace, 只有極少部份不分 namespace  
+### `namespace`：虛擬的叢集隔間
+Namespace 是 K8s 用來在同一個實體叢集中，劃分出多個「**虛擬叢集**」的機制。它就像是辦公室裡的隔間，讓不同的團隊或專案可以各自管理自己的資源，而不會互相干擾。
 
-可以參考 `NAMESPACED` 看看該 kind 是否分 namespace  
-```bash
-$ kubectl api-resources 
-NAME                                SHORTNAMES                          APIVERSION                        NAMESPACED   KIND
-bindings                                                                v1                                true         Binding
-componentstatuses                   cs                                  v1                                false        ComponentStatus
-configmaps                          cm                                  v1                                true         ConfigMap
-endpoints                           ep                                  v1                                true         Endpoints
-...
-```
+-   **用途**：
+    -   **隔離**：避免不同專案間的命名衝突。
+    -   **授權**：可以基於 Namespace 來設定 RBAC 權限。
+    -   **資源配額**：可以為每個 Namespace 設定資源使用上限 (Resource Quota)。
+-   **預設 Namespaces**：
+    -   `default`：您建立物件時若不指定，預設會被放在這裡。
+    -   `kube-system`：K8s 系統組件（如 `etcd`, `kube-scheduler`）的家。
+    -   `kube-public`：通常用於存放一些所有使用者（無論是否認證）都能讀取的公開資料。
+-   **查詢**：
+    -   `kubectl get pods`：只會顯示當前 Namespace 的 Pods。
+    -   `kubectl get pods -n <namespace>`：顯示指定 Namespace 的 Pods。
+    -   `kubectl get pods -A` 或 `--all-namespaces`：顯示所有 Namespace 的 Pods。
 
+### `labels` vs. `annotations`：給誰看的標籤？
+這兩者都是附加在物件上的 key-value 資料，但用途截然不同。
 
-k8s default 核心相關 pod 就會放在 kube-system 這個 namespace  
-一般 user workload 可以放 default or 自己建立 namespace  
+| 特性 | Labels (標籤) | Annotations (註解) |
+| :--- | :--- | :--- |
+| **用途** | **用於識別和篩選物件** | **用於記錄非識別性的元數據** |
+| **給誰看** | 主要給 **K8s 系統**看 | 主要給**人類**或其他**外部工具**看 |
+| **語法** | key 和 value 的格式有嚴格限制 | key 和 value 可以是任意字串 |
+| **範例** | `app: nginx`, `env: production` | `description: "This is my web server"` |
 
+-   **何時使用 `labels`**：當您需要用 `selector` 來**選取**一組物件時。例如，Service 就是透過 `selector` 來找到它應該代理的 Pod。
+-   **何時使用 `annotations`**：當您想為物件附加一些額外的、不會被 K8s 核心組件直接使用的資訊時。許多第三方工具（如 Ingress Controller, Prometheus Operator）會利用 Annotations 來擴充其功能，從而實現比原生 API 更豐富的設定。
 
-關於用途部份  
-他可以用來分散不同的 multiple teams, or projects 使用同一個 k8s cluster  
-另外也能對 hardware resource 做控制 [resource-quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/)  
+## 如何管理 Manifest？
 
-至於平常在使用 kubectl 時要特別注意 namespace 有沒有用對  
-預設情況只會使用設定的 namespace (default)  
-差異如下  
+隨著應用變的複雜，手動管理大量的 YAML 檔案變得不切實際。社群為此發展出了兩種主流的管理工具：
 
-```bash
-$ k get pod
-NAME                       READY   STATUS    RESTARTS        AGE
-httpbin-74f894968d-696cz   1/1     Running   2 (3h21m ago)   5d1h
-httpbin-74f894968d-bbwfw   1/1     Running   2 (3h21m ago)   5d1h
-httpbin-74f894968d-cvhcd   1/1     Running   2 (3h21m ago)   5d1h
-httpbin-74f894968d-gsmqz   1/1     Running   2 (3h21m ago)   5d1h
-httpbin-74f894968d-pddf5   1/1     Running   2 (3h21m ago)   5d1h
-httpbin-74f894968d-q7mb4   1/1     Running   2 (3h21m ago)   5d1h
-httpbin-74f894968d-qpwsj   1/1     Running   2 (3h21m ago)   5d1h
-httpbin-74f894968d-vp26r   1/1     Running   2 (3h21m ago)   5d1h
-httpbin-74f894968d-zv8xv   1/1     Running   2 (3h21m ago)   5d1h
-$ k get pod -A 
-NAMESPACE            NAME                                                READY   STATUS    RESTARTS         AGE
-default              httpbin-74f894968d-696cz                            1/1     Running   2 (3h21m ago)    5d1h
-default              httpbin-74f894968d-bbwfw                            1/1     Running   2 (3h21m ago)    5d1h
-default              httpbin-74f894968d-cvhcd                            1/1     Running   2 (3h21m ago)    5d1h
-default              httpbin-74f894968d-gsmqz                            1/1     Running   2 (3h21m ago)    5d1h
-default              httpbin-74f894968d-pddf5                            1/1     Running   2 (3h21m ago)    5d1h
-default              httpbin-74f894968d-q7mb4                            1/1     Running   2 (3h21m ago)    5d1h
-default              httpbin-74f894968d-qpwsj                            1/1     Running   2 (3h21m ago)    5d1h
-default              httpbin-74f894968d-vp26r                            1/1     Running   2 (3h21m ago)    5d1h
-default              httpbin-74f894968d-zv8xv                            1/1     Running   2 (3h21m ago)    5d1h
-haproxy-controller   haproxy-kubernetes-ingress-67b459d7f8-l89fs         1/1     Running   1 (3h21m ago)    4d4h
-haproxy-controller   haproxy-kubernetes-ingress-67b459d7f8-llxwj         1/1     Running   2 (3h21m ago)    5d2h
-...
-```
+-   **Helm**：K8s 的套件管理器。它將一組相關的 YAML 打包成一個可重複使用、可配置的「Chart」，極大地簡化了複雜應用的分發和部署。
+-   **Kustomize**：一個無模板的 YAML 設定管理工具。它透過對基礎 YAML 進行「疊加 (Overlay)」和「打補丁 (Patch)」的方式來產生不同環境的設定，更貼近原生 YAML 的體驗。
 
-
-## Annotations 
-
-annotation(註解) 用於上加非辨識用 data  
-簡單的理解是 label 是給 k8s 用  
-如果我們想加上一些非給 k8s 用的資訊, 可以使用 annotation  
-這樣可以避免 control-plan 在使用 label 時會有很多不相干的 data  
-
-某些工具也會使用 annotation 來做 api 的擴充  
-舉例來說 k8s ingress API 因設定有限  
-大部分 ingress class 會透過 annotation 來接受更多設定  
-![https://www.haproxy.com/documentation/kubernetes-ingress/community/configuration-reference/ingress/](images/haproxy_ingress.png)
-
-因此有趣的是 annotation 更多時候不只是 annotation  
-可以看成最簡易的 api 的擴充方式  
-
-## manage manifest  
-我們在使用 k8s 時會建立許多 object 比如 ingress,deployment,service...etc  
-要管理這麼多的 object 借助工具會好的多  
-
-k8s 官方提供了 kustomize 這個 tool 幫忙管理眾多的 manifest    
-類似的 tool 還有 helm  
-那以經驗來說 helm 功能強大不少  
-且基本上已成為標準, 大家都會優先支援 helm  
-因此建議直接學習 helm 來管理 manifest   
-
-> [!TIP]
-> 有另一個 [nelm](https://github.com/werf/nelm) project 要取代 helm  
-> 但目前 argoCD 尚未支援, 不過以長期來看 nelm 具有一定潛力  
+對於剛入門的初學者，建議先從 **Helm** 開始，因為它擁有最豐富的社群資源，能讓您快速地部署各種現成的應用程式。

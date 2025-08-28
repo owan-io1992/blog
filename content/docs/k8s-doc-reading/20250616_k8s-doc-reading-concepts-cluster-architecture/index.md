@@ -10,210 +10,103 @@ weight: 3
 concepts-cluster-architecture
 <!--more-->
 
-[doc link](https://kubernetes.io/docs/concepts/overview/components/)  
+[doc link](https://kubernetes.io/docs/concepts/overview/components/)
 
-先對 k8s 架構有一定程度的了解後  
-會更容易上手 k8s  
-首先 k8s 本身就是設計成 cluster 模式  
-會先把 node 分成兩大 node group
+## K8s 架構概覽：大腦與身體
 
-- Control plane: 負責執行 k8s cluster 管理元件  
-  一般來說一個 production ready cluster 會準備 3 個 Control plane node (HA)  
-  他只會執行 k8s 核心元件  
-  預設不會執行 k8s 本身以外的 container  
-- worker: 執行我們 user workloads (container)
+要理解 Kubernetes (K8s) 的架構，我們可以將其比喻為人體：
+
+-   **控制平面 (Control Plane)**：是叢集的「**大腦**」。它負責儲存叢集的狀態、做出全局決策（例如調度），以及偵測和回應叢集事件。它不運行使用者應用程式，只專注於管理。
+-   **工作節點 (Worker Nodes)**：是叢集的「**身體**」和「**四肢**」。它們是真正負責執行您應用程式容器（Pods）的地方。每個 Worker Node 都會接收來自「大腦」的指令，並據此管理在本機運行的容器。
+
+一個典型的生產環境叢集，通常會有多個 Control Plane 節點以實現高可用性 (HA)，以及更多的 Worker Node 來提供運算能力。
 
 ![](images/architecture1.png)
 
+## 控制平面 (大腦) 組件詳解
 
-## component 介紹
-以下我認為大概知道概念即可  
-除了在 debug cluster issue 外  
-一般在操作其實不太會碰到  
+控制平面的所有組件協同工作，為叢集提供統一的視圖和決策中心。
 
-### kube-apiserver
-API server 是負責 component /operator 之間溝通的橋樑  
-不管是機器還是人都是要照著 Kubernetes API 的規範溝通  
-如果連不上 API server 意味著失去對 cluster 的控制能力
+```mermaid
+graph TD
+    subgraph Control Plane
+        A[kube-apiserver]
+        B[etcd]
+        C[kube-scheduler]
+        D[kube-controller-manager]
+        E[cloud-controller-manager]
+    end
+    
+    User[User/Admin] -->|kubectl| A
+    A <--> B
+    A --> C
+    A --> D
+    
+    subgraph Worker Nodes
+      K[kubelet]
+    end
 
+    A --> K
+    C --> K
+    D --> K
 
-### etcd 
-簡單來說就是 k8s 的資料庫  
-預設就是以 HA 的方式運作  
+    subgraph Cloud Provider
+        F[Cloud APIs]
+    end
+    E <--> F
+```
 
-### kube-scheduler
-我們實際在使用 k8s 時, 會告訴他我們的期望執行 container 的條件  
-比如說 cpu/memory 需要多少, 該執行在什麼 cpu architecture 上, 甚至是 node type (有無 GPU 之類的)   
+### `kube-apiserver`：叢集的統一入口
+-   **核心職責**：暴露 Kubernetes API，是所有內部和外部通訊的**唯一入口**。
+-   **作用**：處理 REST 請求、驗證請求、並更新 `etcd` 中的物件狀態。無論是使用者透過 `kubectl` 下達指令，還是叢集內部組件之間的溝通，都必須經過 API Server。如果它故障，您將暫時失去對整個叢集的控制能力。
 
-scheduler 負責根據我們的設定, 編排 container 在符合條件的 work node 上執行   
+### `etcd`：叢集的記憶體
+-   **核心職責**：一個高可用性的鍵值儲存系統，是 K8s 的**唯一資料庫**。
+-   **作用**：儲存了叢集的所有狀態資料，包括 Pod、Service、Secret 等所有物件的設定和當前狀態。`etcd` 的穩定性和備份是維運 K8s 最重要的任務之一。
 
+### `kube-scheduler`：Pod 的調度員
+-   **核心職責**：監控新建立的、尚未被分配到節點的 Pod，並為它們**選擇一個最合適的 Worker Node**。
+-   **作用**：調度決策會基於多種因素，包括資源需求 (requests)、節點親和性 (affinity)、污點與容忍 (taints/tolerations) 以及節點的當前負載等。
 
-### kube-controller-manager
-先貼原文  
+### `kube-controller-manager`：狀態的維護者
+-   **核心職責**：運行一系列的**控制器 (Controller)**，持續地將叢集的「當前狀態」調整為您在物件中定義的「期望狀態」。
+-   **作用**：每個控制器負責一種特定資源。例如：
+    -   **Node Controller**：偵測 Node 是否故障。
+    -   **Deployment Controller**：確保運行的 Pod 數量符合 Deployment 的設定。
+    -   **Job Controller**：監看一次性任務 (Job)，並建立 Pod 來執行它們。
 
-Control plane component that runs controller processes.
+### `cloud-controller-manager`：與雲端的橋樑
+-   **核心職責**：(可選) 讓 K8s 能夠與特定的雲端供應商 (AWS, GCP, Azure) 的 API 互動。
+-   **作用**：它將原本內建於 `kube-controller-manager` 中的雲端相關邏輯分離出來，使得 K8s 核心能夠獨立於各家雲平台發展。它負責處理如雲端負載平衡器、區塊儲存等資源的建立與管理。
 
-Logically, each controller is a separate process, but to reduce complexity, they are all compiled into a single binary and run in a single process.
+## 工作節點 (身體) 組件詳解
 
-There are many different types of controllers. Some examples of them are:
+每個 Worker Node 上都運行著以下關鍵組件，負責管理在本機運行的 Pod。
 
-Node controller: Responsible for noticing and responding when nodes go down.
-Job controller: Watches for Job objects that represent one-off tasks, then creates Pods to run those tasks to completion.
-EndpointSlice controller: Populates EndpointSlice objects (to provide a link between Services and Pods).
-ServiceAccount controller: Create default ServiceAccounts for new namespaces.
-The above is not an exhaustive list.
+### `kubelet`：節點上的總管
+-   **核心職責**：在每個 Node 上運行的代理程式 (Agent)，確保容器在 Pod 中正常運行。
+-   **作用**：`kubelet` 會從 API Server 接收 Pod 的規格定義 (PodSpec)，並指示容器運行時 (Container Runtime) 根據這些規格來啟動、停止或重啟容器。它也負責定期向 API Server 回報 Node 和 Pod 的健康狀態。
 
-簡單來說  
-就是除了上述以外的雜務都是這個 compoment 負責      
+### `kube-proxy`：叢集的網路工程師
+-   **核心職責**：在每個 Node 上維護網路規則，實現 K8s 的 **Service** 概念。
+-   **作用**：`kube-proxy` 確保您能夠透過一個穩定的虛擬 IP (ClusterIP) 來存取一組 Pod，並在這些 Pod 之間進行負載平衡。它通常透過 `iptables` 或 `IPVS` 來實現這些網路規則。
 
-### cloud-controller-manager 
-這是 option component  
-除非你有用 cloud provider (公有雲/私有雲)  
-才有這 component,  但基本上 cloud provider 舉例 EKS  
-不會讓你接觸到 control-plane, 這些元件也會幫你安裝完成  
-他的用途就是跟 cloud 其他服務互動用  
-也是知道即可  
+### `Container Runtime`：容器的執行者
+-   **核心職- 責**：真正負責運行容器的軟體。
+-   **作用**：K8s 支援所有符合 [CRI (Container Runtime Interface)](https://kubernetes.io/docs/concepts/architecture/cri/) 標準的容器運行時，最常見的包括 **containerd** 和 **CRI-O**。
 
-### kubelet
-簡單來說，kubelet 是每個 work node 上的主要代理程式。它負責確保 Pod 中的容器正常運行。  
-它會監控 API server 傳來的 Pod 定義，並確保這些 Pod 及其容器在節點上被正確地啟動、運行和維護。  
+## 不可或缺的附加元件 (Addons)
 
-### kube-proxy
-kube-proxy 負責處理 Service 的網路代理，它會根據 Service 的定義，在每個節點上維護網路規則（例如 iptables 或 IPVS 規則），以實現 Service 的負載平衡和網路轉發，確保流量能夠正確地導向到後端的 Pod。   
+Addons 是擴展 K8s 功能的 Pod 和 Service。它們雖然不是核心組件，但對於建立一個功能完備的叢集至關重要。
 
+### K8s 的插件化哲學
+您會發現，許多基礎功能（如網路、監控、日誌）K8s 本身並**不提供預設的實作**。這並非疏忽，而是一種刻意的設計哲學。K8s 選擇只定義**標準介面**（如 CNI, CSI），並將具體的實作交給廣大的社群和廠商。這種插件化的設計，催生了 K8s 豐富而強大的生態系，讓使用者可以根據自身需求，自由選擇最適合的解決方案。
 
-### Container runtime 
-就是負責執行的 container 的 component  
-個人建議使用 containerd  
+### 關鍵 Addons
+-   **DNS**：叢集 DNS 是必不可少的 Addon，它為 Service 提供名稱解析，讓 Pod 之間可以透過服務名稱而非 IP 位址進行通訊。最常見的實作是 **CoreDNS**。
+-   **網路插件 (CNI)**：K8s 要求每個 Pod 都必須擁有一個獨一無二的 IP 位址，並能與其他 Pod 直接通訊。實現這個網路模型的責任就落在 CNI 插件上。常見的選擇包括 Calico, Cilium, Flannel 等。
+-   **監控與日誌**：K8s 本身不包含完整的監控和日誌方案，您需要自行部署如 Prometheus, Grafana, ELK Stack 等工具來收集和分析叢集的指標與日誌。
 
-## Addons
-提供 cluster features 
-基本上這些 pod 會長在 namespace `kube-system`  
-> **namespace**
-> 用來隔離 k8s 內不同 objects 的基本 group  
-> 預設會有
-> **default**
-> **kube-system**
-> 可以理解為區分不同 user 用的 group  
+---
 
-
-### Cluster DNS
-k8s 透過 DNS 來讓 container 找到彼此   
-因此會有個 DNS server 在 cluster 內(coreDNS)  
-
-### Web UI (Dashboard)
-讓大家方便管理 k8s 的 Dashboard  
-預設不會安裝  
-不過個人覺得看看就好  
-因為很陽春  一般會採用其他 solution  
-
-### Container resource monitoring
-k8s 沒有 implement 先略過  
-
-### Cluster-level Logging 
-k8s 沒有 implement 先略過  
-
-### Network plugins
-k8s 沒有 implement  
-但缺他不可
-簡單來說每個 container 都會有存取網路的需求   
-而這必須夠過 CNI(container network interface)達成, 也就是 Network plugins   
-
-k8s 跟 docker 不同的是 
-docker 不需要額外設定, contianer 就有網路功能  
-
-k8s 必須再額外安裝 CNI 才能運作  
-而 CNI 會有琳瑯滿目的選擇  
-這邊可以看到官方已列出的 plugin [networking-and-network-policy](https://kubernetes.io/docs/concepts/cluster-administration/addons/#networking-and-network-policy)
-
-不同的 CNI 不只 implement 方式不同  
-feature 也會不同  
-比如說有沒有 VPN or firewall 的功能  
-
-不同的 CNI 各自有各自的好壞  
-後面會再介紹  
-
-## Architecture variations 
-簡單來說 k8s 的安裝其實可以根據需求產生變化  
-舉例來說 control-plane 也能執行 user workloads  
-
-### Traditional deployment
-Control plane components run directly on dedicated machines or VMs, often managed as systemd services.
-
-畢竟也是要有人管理 k8s 的運作  
-通常透過 systemd  
-
-### Static Pods
-Control plane components are deployed as static Pods, managed by the kubelet on specific nodes. This is a common approach used by tools like kubeadm.  
-
-這裡第一次出現 pod 這個詞  
-說明一下 pod 是 k8s 最小部屬單位  
-是一個 container 的 group    
-k8s 能讓多個 container 能夠共用 network/volume resource  > 形成一個 pod  
-後面會再詳細說明  
-
-而 Static Pods 則是相當特別的 pod  
-其他的 pod 都是透過 scheduler 編排後透過決定是否交給 kubelet 啟動  
-
-Static Pods 則是跳過 scheduler, kubelet 直接啟動  
-通常都是執行系統 component  
-我們一般不會使用 Static Pods  
-
-### Self-hosted
-The control plane runs as Pods within the Kubernetes cluster itself, managed by Deployments and StatefulSets or other Kubernetes primitives.
-
-把 control plane 執行在 k8s 自身  
-算進階玩法  
-有興趣可以嘗試
-
-### Managed Kubernetes services
-Cloud providers often abstract away the control plane, managing its components as part of their service offering.
-
-簡單來說就是 Cloud providers 基本上不會讓你有管理 control plane 的能力 (都是他們代管)  
-
-## Workload placement considerations 
-
-The placement of workloads, including the control plane components, can vary based on cluster size, performance requirements, and operational policies:  
-
-k8s 架構是可以根據需求調整的  
-
-* In smaller or development clusters, control plane components and user workloads might run on the same nodes.  
-在小型開發環境可以只有一個 control plane node (沒有 HA)  
-並 allow 執行 user workloads  
-用 single node 執行開 k8s  
-
-
-* Larger production clusters often dedicate specific nodes to control plane components, separating them from user workloads.  
-在正式環境  
-請分開 control plane, workload (通常可能 3 control plane node + 3 work node)  
-不過 k3s 預設不這樣設計  都是看需求   
-
-* Some organizations run critical add-ons or monitoring tools on control plane nodes.  
-雖然不讓 control plane 執行 user workloads    
-但是允許讓 monitor 類的 workloads 在 control plane node 執行    
-當然是用來 monitor control plane 了   
-這邊會讓各位先知道  可以根據設定  
-讓部份 workload 不能在 control plane node 執行  
-讓部份 workload 可以在 control plane node 執行  
-
-## Cluster management tools 
-
-社群中有很多 cluster 管理工具  
-這後面再找個篇幅介紹  
-
-## Customization and extensibility 
-Kubernetes architecture allows for significant customization:  
-
-* Custom schedulers can be deployed to work alongside the default Kubernetes scheduler or to replace it entirely.
-* API servers can be extended with CustomResourceDefinitions and API Aggregation.
-* Cloud providers can integrate deeply with Kubernetes using the cloud-controller-manager.
-The flexibility of Kubernetes architecture allows organizations to tailor their clusters to specific needs, balancing factors such as operational complexity, performance, and management overhead.
-
-基本上就是再次強調  
-k8s 的彈性  
-因此造就他的強大  
-
-
----  
-
-以上是 k8s 的基本介紹  
+理解 K8s 的架構和各組件的職責，是深入學習和有效維運 K8s 的第一步。這個分佈式系統的每一部分都各司其職，共同協作，最終為您的應用程式提供了一個強大、穩定且富有彈性的運行平台。

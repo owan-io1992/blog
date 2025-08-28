@@ -9,152 +9,111 @@ weight: 21
 ![alt](images/banner.png)  
 
 <!--more-->
-[doc link - csi](https://kubernetes.io/docs/concepts/storage/volumes/#csi)   
-[doc link - Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/)   
-[doc link - Dynamic Volume Provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/)   
-[doc link - Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)   
+[doc link - CSI](https://kubernetes.io/docs/concepts/storage/volumes/#csi)
+[doc link - Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/)
+[doc link - Dynamic Volume Provisioning](https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/)
+[doc link - Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 
-由於再接下來的功能官方分成好幾個文件  
-為了連貫性 我一併在這裡說明  
+## K8s 儲存的核心思想：分離
 
-在 k8s 中 我們要提供一個儲存空間 會需要對應的 driver  
-稱之為 Container Storage Interface (CSI)  
-不同的 CSI 會對應不同儲存空間, 比如說 iSCSI, NFS, local ...  
-一個 cluster 內可以存在多個 CSI 來滿足不同 pod 的需求  
+在 Kubernetes (K8s) 的世界裡，Pod 是短暫的、隨時可能被銷毀和重建的。那麼，如果我們的應用程式（如資料庫）需要將資料**持久化 (Persistent)**，該怎麼辦？
 
-有了 CSI 之後  
-會使用 PersistentVolumeClaim(PVC) 來建立 volume  
-簡單來說就是跟 CSI 要一個 volume 空間  
-CSI 建立空間後就會提供 Persistent Volumes(PV) object, 來讓 pod mount volume  
+K8s 的解決方案是將「**運算 (Compute)**」和「**儲存 (Storage)**」徹底分離。Pod 專注於運算，而資料則儲存在獨立於 Pod 生命週期的「**儲存卷 (Volume)**」中。
 
-簡易關係如下  
+為了讓這個機制更靈活、更適應不同的儲存環境，K8s 設計了一套精巧的抽象層。我們可以把它比喻成去餐廳點牛排的過程：
+
+| K8s 物件 | 餐廳比喻 | 角色 |
+| :--- | :--- | :--- |
+| **Pod** | 顧客 | 需要儲存空間的應用程式。 |
+| **PersistentVolumeClaim (PVC)** | 訂單 | 顧客向餐廳下的訂單，描述了需要什麼樣的儲存（大小、效能等級）。 |
+| **StorageClass (SC)** | 菜單 | 餐廳提供的菜單，定義了不同種類的儲存選項（如 `ssd`, `hdd`）及其特性。 |
+| **Container Storage Interface (CSI)**| 廚房 | 實際提供儲存資源的後端系統（如 AWS EBS, Ceph, NFS）的驅動程式。 |
+| **PersistentVolume (PV)** | 牛排 | 由廚房根據訂單實際準備好的、獨一無二的那份儲存空間，準備給顧客使用。 |
+
+## 儲存系統的四大金剛
+
+這四個物件協同工作，構成了 K8s 持久化儲存的基礎。
 
 ```mermaid
 graph TD
-    POD -- 1.建立儲存請求 --> PVC
-    CSI -- 2.了解需求 --> PVC
-    CSI -- 3.建立儲存 --> PV
-    POD -- 4.掛載 --> PV 
+    subgraph User / App
+        A[Pod] -- "發起儲存請求" --> B(PVC: PersistentVolumeClaim);
+    end
+
+    subgraph Cluster Admin
+        C(StorageClass) -- "定義儲存類型" --> D{CSI Driver};
+    end
+    
+    B -- "指定使用哪個 StorageClass" --> C;
+    
+    subgraph Kubernetes Control Plane
+        D -- "根據 PVC 和 SC 的定義" --> E(PV: PersistentVolume);
+    end
+    
+    E -- "與 PVC 綁定 (Bind)" --> B;
+    A -- "掛載 (Mount) 已綁定的 Volume" --> E;
 ```
 
+### 1. CSI Driver (廚房)
+**Container Storage Interface (CSI)** 是一個標準介面，它允許各種第三方儲存廠商（如 AWS, Google, NetApp, Ceph）將自己的儲存系統無縫地接入 K8s，而無需修改 K8s 的核心程式碼。您可以將它理解為 K8s 的「儲存驅動程式」。
 
-## CSI  
-Container Storage Interface (CSI)  
+### 2. StorageClass (菜單)
+一個 **StorageClass (SC)** 物件定義了一種「儲存的類型」。它會告訴 K8s 當收到儲存請求時，應該使用哪個 `provisioner` (即哪個 CSI Driver)，以及在建立儲存時需要傳遞哪些參數（如效能等級 `io1`、檔案系統類型 `xfs` 等）。叢集管理者可以定義多個 StorageClass，例如 `fast-ssd` 和 `slow-hdd`，以滿足不同應用的需求。
 
-CSI 簡單來說就是儲存空間的 driver  
-不同的儲存空間會有不同的特性/功能  
-比如說是否支援 clone/snapshot/backup  
-能否設定 iops/throughput/size  
-
-較常見的有 [longhorn](https://github.com/longhorn/longhorn), [rook](https://github.com/rook/rook),[local](https://kubernetes.io/docs/concepts/storage/storage-classes/#local)  
-
-### storage class  
-storage class 跟 ingress class 概念差不多  
-一個 CSI 可以建立多個 storage class  
-storage class 用來 PVC 指定使用那 CSI 及設定
-
-以下範例
-```bash
+```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: ebs-sc
-provisioner: ebs.csi.aws.com
-volumeBindingMode: WaitForFirstConsumer
+provisioner: ebs.csi.aws.com # 指定使用 AWS EBS 的 CSI Driver
 parameters:
-  csi.storage.k8s.io/fstype: xfs
   type: io1
   iopsPerGB: "50"
   encrypted: "true"
-  tagSpecification_1: "key1=value1"
-  tagSpecification_2: "key2=value2"
-allowedTopologies:
-- matchLabelExpressions:
-  - key: topology.ebs.csi.aws.com/zone
-    values:
-    - us-east-2c
 ```
 
-這個 storage class 指定使用 CSI provisioner  
-要建立 aws ebs type 為 io1  
-及性能參數 iopsPerGB 還有其他設定  
-實際須看 CSI 的 doc 才知道能做哪些設定  
+### 3. PersistentVolumeClaim (訂單)
+**PersistentVolumeClaim (PVC)** 是開發者（使用者）向叢集發出的「儲存請求」。它描述了應用程式需要多大的空間、需要什麼樣的存取模式，以及期望使用哪個 `storageClassName`。
 
-所以應用之一是可以建立 low,medium,high 等多種 storage class 來對應 pod 的 volume performance 需求  
-
-
-## PVC
-PersistentVolumeClaim(PVC)  
-
-PVC 是讓 pod 發出一個建立 volume 的請求  
-其中可以再包含部份設定
-
-設定範例  
-```
+```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: claim1
+  name: my-app-pvc
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: fast
+  storageClassName: ebs-sc # 指定使用上面定義的 StorageClass
   resources:
     requests:
-      storage: 30Gi
+      storage: 10Gi # 請求 10 GiB 的儲存空間
 ```
 
+### 4. PersistentVolume (牛排)
+**PersistentVolume (PV)** 代表了叢集中一塊已經被配置好的、實際存在的網路儲存。它包含了儲存的詳細資訊，如容量、存取模式、以及它所屬的 StorageClass。
 
-這 config 跟 storage class "fast" 要一個 30Gi 空間  
-在這之後 CSI 就會建立一個 volume  
+## 動態配置 vs. 靜態配置
 
-accessModes 可以用來設定是否允許多個 pod / host 同時使用這個 volume  
+PV 和 PVC 的互動模式有兩種：
 
-accessModes 支援以下種類, **不過實際必須看 CSI 是否支援**  
-- ReadWriteOnce: 允許單一 node 使用, 但該 node 上允許多個 pod 同時進行讀取/寫入  
-- ReadOnlyMany: 允許多個 node/pod 同時讀取  
-- ReadWriteMany: 允許多個 node/pod 同時讀取/寫入  
-- ReadWriteOncePod: 允許單一 pod 讀取/寫入  
+-   **動態配置 (Dynamic Provisioning) - 推薦**：
+    這是最常用、也是推薦的方式。如上面的流程圖所示，管理者只需設定好 CSI Driver 和 StorageClass。開發者提交 PVC 請求後，CSI Driver 會**自動地**根據 PVC 的要求，去後端儲存系統（如 AWS EBS）建立一塊對應的儲存空間，並將其註冊為一個新的 PV 物件，最後再與 PVC 進行綁定。整個過程全自動完成。
 
-參考文件 [access-modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)
+-   **靜態配置 (Static Provisioning)**：
+    在這種模式下，叢集管理者需要**手動地**預先建立好一批 PV。當開發者提交 PVC 請求時，K8s 會去尋找現有的、尚未被綁定的 PV 中，是否有符合該 PVC 要求的（例如 StorageClass、容量、存取模式），如果找到，就將它們綁定在一起。這種方式較不靈活，通常只在特殊場景下使用。
 
+## Access Modes 詳解
 
-## persistent volume 
-persistent volume(PV)  
+Access Mode 定義了 PV 可以被如何掛載。
 
-PV 就是 CSI 讀取 PVC 後建立的空間, POD 就可以 mount 此 PV 來使用  
+| Access Mode | 縮寫 | 描述 | 常見支援的儲存類型 |
+| :--- | :--- | :--- | :--- |
+| `ReadWriteOnce` | RWO | 該儲存卷**一次只能被一個節點**以讀寫模式掛載。但該節點上的多個 Pod 可以同時存取。 | 區塊儲存 (如 AWS EBS, GCP PD) |
+| `ReadOnlyMany` | ROX | 該儲存卷可以被**多個節點**以**唯讀**模式同時掛載。 | 所有類型 |
+| `ReadWriteMany` | RWX | 該儲存卷可以被**多個節點**以**讀寫**模式同時掛載。 | 檔案儲存 (如 NFS, AWS EFS, CephFS) |
+| `ReadWriteOncePod`| RWOP | 該儲存卷**一次只能被叢集中的單一 Pod** 掛載。 | CSI v1.5+ |
 
-
-config sample  
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  name: mypod
-spec:
-  containers:
-    - name: myfrontend
-      image: nginx
-      volumeMounts:
-      - mountPath: "/var/www/html"
-        name: mypd
-  volumes:
-    - name: mypd
-      persistentVolumeClaim:
-        claimName: myclaim
-```
-
-以上範例是使用 PVC `myclaim` 建立的 PV  
-mount 在 /var/www/html  
-
+> **重要**：一個儲存系統是否支援某種 Access Mode，完全取決於其 **CSI Driver 的實作**。在選擇儲存方案前，務必確認其支援的存取模式。
 
 ---
-
-以上是 storage 快速介紹  
-事實上 storage 幾乎可以說是另一門科學  
-如果是 public cloud 環境可以不用考慮太多  直接使用即可  
-但如果是 on-premises 務必要做好功課  
-要是設定不好  
-輕則效率不佳  
-重則資料喪失  
-會是很沈重的代價  
+K8s 的儲存系統雖然初看複雜，但其分層的抽象設計，正是它能夠適應各種複雜環境、實現儲存即服務 (Storage-as-a-Service) 的關鍵。對於正式環境，特別是本地部署 (On-Premises)，深入理解並謹慎選擇儲存方案，是保障資料安全與系統效能的重中之重。

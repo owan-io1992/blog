@@ -1,4 +1,10 @@
 ---
-title: k8s-doc-reading
+title: "Kubernetes 官方文件讀書會"
 weight: 1
 ---
+
+本章節集結了「Kubernetes 官方文件讀書會」系列的所有文章。
+
+我們打破了官方文件的原有章節，按照更符合實務和由淺入深的認知順序，重新編排了學習路徑。透過生動的比喻、清晰的圖表和範例，希望能幫助您更有效率地掌握 K8s 的核心概念。
+
+點擊 [**這裡**](/docs/k8s-doc-reading/20250614_k8s-doc-reading-index/) 開始您的學習之旅。

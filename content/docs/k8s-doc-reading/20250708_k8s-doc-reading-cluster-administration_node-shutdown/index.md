@@ -9,95 +9,106 @@ weight: 28
 ![alt](images/banner.png)  
 
 <!--more-->
-[doc link](https://kubernetes.io/docs/concepts/cluster-administration/node-shutdown/)   
+[doc link](https://kubernetes.io/docs/concepts/cluster-administration/node-shutdown/)
 [doc link](https://kubernetes.io/blog/2021/04/21/graceful-node-shutdown-beta/)
-[doc link](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
-[doc link](https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/)
 
-在 k8s 中可能會需要維護需求而重開 node, 舉例更新 k8s, system, firmware  
-因此 k8s 提供 graceful shutdown 機制讓我們能夠停機  
+在 Kubernetes (K8s) 叢集的生命週期中，節點 (Node) 停機是不可避免的常態。無論是計畫性的核心升級、硬體維護，還是突發性的斷電、硬體故障，我們都必須有一套成熟的應對策略，以確保叢集上的應用程式能盡可能地不受影響。
 
-另外這篇也順帶了解如果 node 發生非預期的狀態 k8s 會如何處理  
+本篇文章將從「計畫性」和「非計畫性」兩個維度，探討 K8s 中處理節點關閉的各種機制。
 
-而 shutdown node 有兩種方式  
-人為 trigger, 或是由 infra trigger  
-所謂的 infra trigger  
-可能是因為停電而收到 shutdown signal  
-或是在 cloud 環境會因為 spot 環境收到 shutdown signal  
-因為 infra trigger 是自動發生的  
-所以 k8s 也提供 graceful shutdown 的機制  
+## 場景一：計畫性維護 (手動優雅關機)
 
-## manual graceful node shutdown 
-先說人為的部份, 舉例來說定期更新系統需求, 會要 graceful node shutdown  
+當您需要對某個節點進行可預期的維護時（例如：升級作業系統、更換硬體），最推薦、也最安全的方式是使用 `kubectl drain` 指令。
 
-這部份除了用前面說的 [taint-and-toleration](/posts/20250704_k8s-doc-reading-taint-and-toleration/)  
-k8s 提供一個 Safely Drain a Node 的方法  
+`drain` 指令會優雅地將節點上的 Pod 驅逐，它的工作流程如下：
 
-關於這部份 其實在前面已經提過 因此就直接超連結過去 [maintain-a-node](/posts/20250617_k8s-doc-reading-concepts-cluster-architecture-node/#maintain-a-node/)  
+```mermaid
+graph TD
+    A[開始: `kubectl drain <node-name>`] --> B{1. Cordon Node};
+    B --> C{2. Evict Pods};
+    C --> D[等待所有 Pod <br> 在其他節點上重建完成];
+    D --> E[完成: 節點已清空，可以安全關機];
 
-## auto graceful node shutdown 
-再來說說自動的部份  
-由於執行中的 pod 是由 kubelet 管理  
-因此 graceful shutdown 會設定 kubelet 在  
-當 kubelet 收到 stop signal 時 會進行 [normal pod termination process](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination)  
+    subgraph "B: Cordon Node"
+        B1["將節點標記為 `unschedulable`"]
+        B2["(不再接受新的 Pod 調度)"]
+    end
+    
+    subgraph "C: Evict Pods"
+        C1["遵循 PodDisruptionBudgets (PDB)"]
+        C2["優雅地終止 (graceful termination) Pod"]
+        C3["(尊重 `terminationGracePeriodSeconds`)"]
+    end
+    
+    B --> B1 & B2
+    C --> C1 & C2 & C3
+```
 
-其中 pod 有細分 `normal pod`, `critical pods`
-> 關於 `critical pods` 可以參考 [doc](https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/#marking-pod-as-critical)  
-
-
-設定部份, 有
-- shutdownGracePeriod  
-  設定 `normal pod`, `critical pods` 總共的 graceful terminal 時間, default 0
-- shutdownGracePeriodCriticalPods
-  設定 `critical pods` 的 graceful terminal 時間, default 0
-
-假設 shutdownGracePeriod=30s, shutdownGracePeriodCriticalPods=10s  
-那 0-20s 會是 shutdown normal pod  
-21-30s 會是 shutdown critical pod  
-
-而由於 default 都是 0, 因此實際上 k8s default 並沒有啟動 graceful shutdown  
-
-
-**setup**   
-首先要寫 [config file](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)  
-
-vi /etc/kubernetes/kubelet.conf
+**操作指令：**
 ```bash
+# 1. 將 node-1 標記為不可調度，並驅逐其上所有 Pod
+# --ignore-daemonsets: 因為 DaemonSet Pod 會被自動忽略，所以通常會加上此參數
+# --delete-emptydir-data: 如果 Pod 使用了 emptyDir，加上此參數以刪除資料
+kubectl drain node-1 --ignore-daemonsets --delete-emptydir-data
+
+# 2. 進行節點維護 (重啟、關機等)
+# ...
+
+# 3. 維護完成後，讓節點重新回到可調度狀態
+kubectl uncordon node-1
+```
+> 關於 `drain` 的更詳細介紹，可以參考 [節點維護 (Maintaining a Node)](/docs/k8s-doc-reading/20250617_k8s-doc-reading-concepts-cluster-architecture-node/#maintain-a-node) 一文。
+
+## 場景二：預期內關機 (自動優雅關機)
+
+有些關機事件雖然是自動觸發，但系統有機會提前通知 `kubelet`。例如：
+-   UPS 偵測到斷電，發送關機訊號。
+-   雲端上的 Spot 實例即將被回收。
+
+在這種情況下，我們可以設定 `kubelet`，讓它在收到系統的關機訊號後，執行一個優雅的 Pod 終止流程。
+
+### Kubelet 優雅關機設定
+這個功能預設是**關閉**的。您需要修改 `kubelet` 的設定檔來啟用它。
+
+**設定檔範例 (`/etc/kubernetes/kubelet.conf`):**
+```yaml
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
+# --- 優雅關機設定 ---
+# 總寬限期
 shutdownGracePeriod: 30s
+# 留給「關鍵 Pod」的寬限期
 shutdownGracePeriodCriticalPods: 10s
 ```
 
-> 詳細 config 參數可參考 https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/  
+這個設定的運作流程如下：
+1.  `kubelet` 偵測到節點即將關機。
+2.  它會給予一個總共 `30s` 的寬限期。
+3.  在前 `20s` (`30s - 10s`)，`kubelet` 會嘗試終止所有**非關鍵**的普通 Pod。
+4.  在最後的 `10s`，`kubelet` 會嘗試終止被標記為**關鍵**的 Pod ([Critical Pods](https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/))，例如系統自帶的 CNI、CSI 等插件。
 
-接著執行 `sudo systemctl edit kubelet` 在 kubelet 加上啟動參數 `--config=/etc/kubernetes/kubelet.conf`  
+## 場景三：突發性故障 (非優雅關機)
 
+最糟糕的情況是節點在沒有任何預警下直接「失聯」，例如：硬體故障、網路中斷。
 
-如果跟我一樣是 k3s 環境  
-則是把 [config](https://docs.k3s.io/installation/configuration) 放到 `/var/lib/rancher/k3s/agent/etc/kubelet.conf.d/nodeGracefulShutdown.conf`  
+在這種情況下，`kubelet` 完全沒有機會去優雅地終止 Pod。這會導致一些問題，特別是對於有狀態的應用 (`StatefulSet`)：
+-   **Pod 卡在 `Terminating` 狀態**：Control Plane 因為無法從失聯的 `kubelet` 收到 Pod 已終止的確認，所以會一直等待。
+-   **Volume 無法分離**：由於 Pod 未被正常刪除，它所掛載的持久化儲存 (PV) 也會一直處於 `Attached` 狀態，導致新的 Pod 無法在其他節點上掛載同一個 PV。
 
+### 手動介入：`out-of-service` Taint
+為了解決這個僵局，K8s 提供了一個「最終手段」。如果叢集管理者確認一個節點已經永久性地無法恢復，可以手動為該節點加上一個特殊的 Taint：
 
-## Non-graceful node shutdown handling 
+```bash
+# 為失聯的 node-2 加上 out-of-service Taint
+# 效果可以是 NoExecute 或 NoSchedule
+kubectl taint nodes node-2 node.kubernetes.io/out-of-service=nodes.kubernetes.io/out-of-service:NoExecute
+```
+當 `kube-controller-manager` 偵測到這個 Taint 後，它會理解為「這個節點上的 Pod 可以被強制刪除了」。此時，它會：
+1.  **強制刪除**卡在 `Terminating` 狀態的 Pod。
+2.  **強制分離** (detach) 與該節點關聯的 VolumeAttachments。
 
-由於 k8s 會自動監測 pod status, 基本上如果採用 deployment 佈署  
-當 pod 數量不滿足時會自動補齊  
-
-但 statefulset 就不一樣了  
-由於其 stateful 特性, pod 會因為沒有正常 terminate  
-導致 pod 永久卡在 terminating 狀態
-
-另外就是 pod 如果有掛 volume `VolumeAttachments` 也會卡住無法 detach   
-
-
-這時會需要人工介入  
-要用到我們之前的 taint  
-加上 `node.kubernetes.io/out-of-service`, 不管 NoExecute or NoSchedule    
-這時 k8s 會 force delete pod, 並且 detach volume  
+這使得 StatefulSet 的 Pod 能夠在其他健康的節點上被重新建立，並重新掛載其所需的 PV，從而恢復服務。
 
 ---
-
-以上熟悉 node shutdown behavior 之後  
-要管理 node 會就更得心應手  
-一切交給自動化協助, 更能將時間用在有用的地方   
+總結來說，熟悉 K8s 處理節點停機的各種機制，並為您的叢集做好適當的設定（例如啟用 `kubelet` 優雅關機、為重要應用設定 PDB），是保障叢集穩定性和應用高可用性的重要一環。
 
