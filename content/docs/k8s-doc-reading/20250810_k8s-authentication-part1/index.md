@@ -47,17 +47,25 @@ graph LR
     end
 
     subgraph "權限 (Role / ClusterRole)"
-        R[Role <br> (Namespace-scoped)]
-        CR[ClusterRole <br> (Cluster-scoped)]
+        R["Role<br/>(Namespace-scoped)"]
+        CR["ClusterRole<br/>(Cluster-scoped)"]
     end
     
     subgraph "綁定 (Binding)"
-        RB[RoleBinding <br> (Namespace-scoped)]
-        CRB[ClusterRoleBinding <br> (Cluster-scoped)]
+        RB["RoleBinding<br/>(Namespace-scoped)"]
+        CRB["ClusterRoleBinding<br/>(Cluster-scoped)"]
     end
 
-    U & G & SA -- 被綁定 --> RB & CRB
-    RB & CRB -- 引用 --> R & CR
+    U --> RB
+    U --> CRB
+    G --> RB
+    G --> CRB
+    SA --> RB
+    SA --> CRB
+
+    RB --> R
+    RB --> CR
+    CRB --> CR
 ```
 
 ### 步驟 1：定義權限 (Role / ClusterRole)
