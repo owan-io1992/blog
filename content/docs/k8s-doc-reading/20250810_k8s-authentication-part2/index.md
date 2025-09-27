@@ -6,7 +6,7 @@ tags:
 title: "kubernetes authentication - part2"
 weight: 32
 ---
-![alt](images/banner.png)  
+![alt](images/banner.jpg)  
 
 <!--more-->
 
@@ -185,7 +185,129 @@ graph TD;
     user -- Request with ID Token --> api_server;
 ```
 
-透過 Dex，您可以無縫地將現有的企業身份系統與 K8s 整合，實現真正的 SSO，而無需在 K8s 中維護任何使用者憑證。由於 Dex 的安裝與設定較為複雜，我們將在後續的文章中提供詳細的實作教學。
+### 實作
+參考文章 https://geek-cookbook.funkypenguin.co.nz/kubernetes/oidc-authentication/k3s-keycloak/  
+
+我這邊設定 github oauth + dex  
+
+參考 https://docs.k3s.io/installation/configuration#configuration-file  
+設定 api server 存取 OIDC  
+```bash
+vi /etc/rancher/k3s/config.yaml
+kube-apiserver-arg:
+- "oidc-issuer-url=<oidc-issuer-url>"
+- "oidc-client-id=<oidc-client-id>"
+- "oidc-username-claim=email"
+- "oidc-groups-claim=groups"
+```
+
+then restart k3s server
+```bash
+restart k3s server 
+sudo systemctl restart k3s
+```
+
+安裝驗證工具
+```bash
+mise use -g krew kubelogin
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+```
+
+執行 OIDC 驗證  
+```bash
+kubectl oidc-login setup \
+  --oidc-issuer-url=<oidc-issuer-url> \
+  --oidc-client-id=<oidc-client-id> \
+  --oidc-extra-scope=email,openid,groups,profile,offline_access \
+  --oidc-client-secret=<oidc-client-secret>
+Authentication in progress...
+error: could not open the browser: exec: "xdg-open,x-www-browser,www-browser": executable file not found in $PATH
+
+Please visit the following URL in your browser manually: http://localhost:8000/
+```
+
+當驗證成功後  
+會看到 OIDC 提供的資訊, 以及 command for setup kubeconfig
+```
+## Authenticated with the OpenID Connect Provider
+
+You got the token with the following claims:
+
+
+{
+  "iss": "https://xxx",
+  "sub": "xxx",
+  "aud": "k3s-oidc-owanio1992-cloudns-nz",
+  "exp": 1759057994,
+  "iat": 1758971594,
+  "nonce": "dpm-wofsd-BPGNwqv7ZE-UKgbaeab2mEEMCBK5GwLKg",
+  "at_hash": "cNF083gbIONxp2Lkuca0cQ",
+  "c_hash": "AJcIrCuV6hKMDY4rlIQ7-A",
+  "email": "owan.io1992@gmail.com",
+  "email_verified": true,
+  "groups": [
+    "owan-io1992:test"
+  ],
+  "name": "owan",
+  "preferred_username": "owanio1992"
+}
+
+
+## Set up the kubeconfig
+
+You can run the following command to set up the kubeconfig:
+
+
+kubectl config set-credentials oidc \
+  --exec-api-version=client.authentication.k8s.io/v1 \
+  --exec-interactive-mode=Never \
+  --exec-command=kubectl \
+  --exec-arg=oidc-login \
+  --exec-arg=get-token \
+  --exec-arg="--oidc-issuer-url=https://xxx" \
+  --exec-arg="--oidc-client-id=xxx" \
+  --exec-arg="--oidc-client-secret=xxx" \
+  --exec-arg="--oidc-extra-scope=email" \
+  --exec-arg="--oidc-extra-scope=openid" \
+  --exec-arg="--oidc-extra-scope=groups" \
+  --exec-arg="--oidc-extra-scope=profile" \
+  --exec-arg="--oidc-extra-scope=offline_access"
+
+```
+
+測試存取,因為還沒有給 RBAC, 失敗會是正常的, 但是能看到 user 為 "owan.io1992@gmail.com"    
+```bash
+$ kubectl --user=oidc cluster-info
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+Error from server (Forbidden): services is forbidden: User "owan.io1992@gmail.com" cannot list resource "services" in API group "" in the namespace "kube-system"
+
+$ kubectl whoami --user=oidc
+owan.io1992@gmail.com
+```
+
+設定 RBAC  
+```{filename="clusterrolebinding-oidc-group-admin-kube-apiserver.yaml"}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: oidc-group-admin-kube-apiserver
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin 
+subjects:
+- kind: Group
+  name: oidc:admin-kube-apiserver
+```
+
+apply 後
+就可能存取 cluster 了
+
+最後設定 config default user 為 oidc
+```bash
+kubectl config set-context --current --user=oidc
+```
 
 ## 總結
 
