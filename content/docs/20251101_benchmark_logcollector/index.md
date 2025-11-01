@@ -2,8 +2,12 @@
 date: 2025-11-01T11:34:00  
 draft: false
 tags: []
-title: "benchmark log collector fluent-bit, alloy, promtail"
+title: "benchmark log collector for loki - fluent-bit, alloy, promtail"
 ---
+
+自從 grafana 決定啟動 alloy 這個計畫後  
+一直想測試哪個 log collector 有最好的 performance  
+以下簡單測試  
 
 ## test version 
 fluent-bit: v4.1.1  
@@ -193,9 +197,14 @@ promtail-lmx5q                                          73m          72Mi
 
 ## conclusion
 alloy: 與前身 grafana agent 似乎有同樣的問題, 使用相當多的 memory  
-但其支援 metrics/log/trace 可以進一部測試功能開的越多時 是否會使用更多 resource, 以及效果如何 
-否能剩任 all-in-one collector
+但其支援 metrics/log/trace 之後進一部測試功能開的越多時  
+是否會使用更多 resource?  
+以及處理 metrics/trace 效果如何?  
+是否能剩任 all-in-one collector?  
 
-fluent-bit: 出乎意料的使用相當高的 cpu, memory 表現亮眼
+fluent-bit: 出乎意料的使用相當高的 cpu, memory 表現亮眼  
+也能 collect metrics/trace, 但畢竟術業有專攻, 以前測試並不滿意  
+單純 collect log 很好用  
 
 promtail: 表現平衡, 但僅限蒐集 log  
+官方已經正式 annonce 要轉移至 alloy  
