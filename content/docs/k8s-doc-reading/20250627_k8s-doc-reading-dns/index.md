@@ -11,9 +11,11 @@ weight: 19
 <!--more-->
 [doc link](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
 
-## 為什麼需要叢集 DNS？
+pod/service 每一次新增刪除都會 assigin new ip  
+因此 connection 要去使用 ip 連線是不現實的, 因為他會一直異動  
 
-在 Kubernetes (K8s) 的動態世界裡，Pod 的生命是短暫的。它們會因為擴展、更新、節點故障等各種原因被頻繁地銷毀和重建，每次重建都會獲得一個**新的 IP 位址**。
+在 cloud 的世界, 不管是公有雲還是 k8s 都是同樣的狀況  
+因此會提供 DNS name 來讓 access pod/service 能夠輕易達成  
 
 這帶來一個問題：如果服務 A 要與服務 B 通訊，它該如何找到服務 B 的 IP 位址？直接依賴 Pod 的 IP 顯然是不可行的。
 
