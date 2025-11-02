@@ -1,5 +1,5 @@
 ---
-date: 2025-11-01T11:34:00  
+date: 2025-11-02T05:30:00  
 draft: false
 tags: []
 title: "introduction Grafana Alloy"
@@ -108,7 +108,7 @@ victoria-metrics-agent-d6cff6696-lg964                  2m           102Mi
 victoria-metrics-agent-prometheus-node-exporter-6l5jm   4m           10Mi     
 ```
 
-坦白說 這 resource usage 另我難以接受  
+坦白說 這 resource usage 令我難以接受  
 看來採用 victoria-metrics-agent 依舊是較佳選擇  
 
 
