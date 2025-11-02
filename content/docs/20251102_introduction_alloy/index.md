@@ -240,6 +240,6 @@ promtail-9hpgh                                          30m          126Mi
 
 ## conclusion
 
-grafana alloy 雖然理念很好
+grafana alloy 雖然理念很好  
 但 all-in-one observability collector 依舊是呈現術業有專攻的現象  
 以目前來說, 各自採用合適的 collector 依舊是較佳的選擇  
