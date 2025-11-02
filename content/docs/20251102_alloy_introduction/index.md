@@ -2,7 +2,7 @@
 date: 2025-11-01T11:34:00  
 draft: false
 tags: []
-title: "Grafana Alloy introduction"
+title: "introduction Grafana Alloy"
 ---
 
 [Grafana Alloy](https://grafana.com/docs/alloy/latest/): 前身為 grafana agent  
