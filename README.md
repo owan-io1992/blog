@@ -25,7 +25,7 @@ This command starts a local development server and opens up a browser window. Mo
 hugo new content [path] [flags]
 
 eg.
-hugo new content content/docs/20250928_SSO_Evaluate/index.md
+hugo new content content/docs/20251102_alloy_introduction/index.md
 ```
 
 ## Build
