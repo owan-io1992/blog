@@ -44,4 +44,3 @@ about objects in kubernetes
 with text:objects in kubernetes
 ```
 
-test3
