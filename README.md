@@ -25,7 +25,7 @@ This command starts a local development server and opens up a browser window. Mo
 hugo new content [path] [flags]
 
 eg.
-hugo new content content/docs/20251102_introduction_victoria-metrics-agent/index.md
+hugo new content content/docs/20251104_prometheus_annotation_scrape_config/index.md
 ```
 
 ## Build
