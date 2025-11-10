@@ -45,7 +45,7 @@ K3s 在安裝後會自動配置並啟動 Kubernetes 節點服務，這簡化了�
 ## 4. CLI 工具與 kubectl 整合
 
 ### RKE2
-RKE2 預設不包含 `kubectl` 命令，但會提供一個獨立的 `rke2` CLI 工具，可以執行相關管理操作。如果需要使用 `kubectl`，需要單獨安裝或配置。
+RKE2 預設包含 `kubectl` 命令，它位於 RKE2 的二進制目錄 `/var/lib/rancher/rke2/bin/` 中。使用者可以通過配置環境變數或直接使用完整路徑來執行 `kubectl`。此外，RKE2 也提供一個獨立的 `rke2` CLI 工具，可以執行相關管理操作。
 
 ```
 $ rke2 --help
