@@ -73,6 +73,10 @@ menu:
     #   name: Blog
     #   pageRef: /blog
     #   weight: 3
+    - identifier: tags
+      name: Tags
+      pageRef: /tags
+      weight: 2
     - identifier: about
       name: About
       pageRef: /about
