@@ -25,7 +25,7 @@ This command starts a local development server and opens up a browser window. Mo
 hugo new content [path] [flags]
 
 eg.
-hugo new content content/docs/20251112_k3s_NodeAffinity/index.md
+hugo new content content/docs/20251117_reserve_compute_resources_for_system_daemons/index.md
 ```
 
 ## Build
