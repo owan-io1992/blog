@@ -34,6 +34,8 @@ weight: 27
 
 您可以使用 `kubectl taint` 指令為 Node 加上或移除 Taint。一個 Taint 由三部分組成：`key=value:effect`。
 
+format: `kubectl taint nodes <node name> <key>=<value>:<effect>` 
+
 `effect` 是 Taint 最重要的部分，它定義了排斥行為的嚴格程度：
 
 | Effect | 描述 |
