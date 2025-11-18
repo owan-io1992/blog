@@ -64,11 +64,12 @@ The following operators can only be used with `nodeAffinity`.
 
 | kind  | field  | support LabelSelector  | 
 |---|---|---|
-| deployment  | selector  | matchLabels/matchExpressions  | 
-| statefulset  | selector  | matchLabels/matchExpressions  |  
-| service  | selector  |  matchLabels | 
-| networkpolicies  | podSelector  | matchLabels/matchExpressions  | 
-
+| Deployment  | selector  | matchLabels/matchExpressions  | 
+| StatefulSet  | selector  | matchLabels/matchExpressions  |  
+| Service  | selector  |  matchLabels | 
+| NetworkPolicy  | podSelector  | matchLabels/matchExpressions  | 
+| PersistentVolume  | nodeAffinity  | matchExpressions  | 
+| PersistentVolumeClaim  | selector  | matchLabels/matchExpressions  | 
 
 ## Taints and Tolerations
 雖不是 label 
