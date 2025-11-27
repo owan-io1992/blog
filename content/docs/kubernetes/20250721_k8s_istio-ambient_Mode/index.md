@@ -7,7 +7,7 @@ title: "introduction istio Ambient Mode"
 
 <!--more-->
 
-https://istio.io/latest/docs/
+https://istio.io/latest/docs/ambient/
 
 ## install
 ```bash
@@ -23,7 +23,21 @@ kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
 istioctl version
 
 # install istio
-istioctl install --set profile=ambient --skip-confirmation
+istioctl install \
+  --set profile=ambient \
+  --skip-confirmation
+```
+
+> [!NOTE]
+> if your use k3s with cni "flannel", need add `values.cni.cniBinDir`,`values.cni.cniConfDir`
+> ref. https://istio.io/latest/docs/ambient/install/platform-prerequisites/#k3s
+
+```bash
+# install istio in k3s with cni "flannel"
+istioctl install \
+  --set profile=ambient \
+  --skip-confirmation \
+  --set values.global.platform=k3s
 ```
 
 # Deploy a sample application
