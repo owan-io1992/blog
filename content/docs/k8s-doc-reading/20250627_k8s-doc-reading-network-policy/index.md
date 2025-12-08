@@ -98,8 +98,8 @@ spec:
 ## `to` 和 `from` 的邏輯：OR 與 AND
 
 在 `ingress.from` 或 `egress.to` 規則中：
--   **不同 `-` 之間的規則是「OR」的關係**：只要滿足其中**任一**條件即可。
--   **同一個 `-` 下的規則是「AND」的關係**：必須**同時滿足**所有條件。
+-   **不同 `from array elements` 之間的規則是「OR」的關係**：只要滿足其中**任一**條件即可。
+-   **同一個 `from array elements` 下的規則是「AND」的關係**：必須**同時滿足**所有條件。
 
 **OR 範例**：允許來自 `user: alice` 的 Namespace **或者** 來自 `role: client` 的 Pod。
 ```yaml
