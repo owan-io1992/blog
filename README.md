@@ -25,7 +25,7 @@ This command starts a local development server and opens up a browser window. Mo
 hugo new content [path] [flags]
 
 eg.
-hugo new content content/docs/kubernetes/20251118_k8s_label_selector/index.md
+hugo new content content/docs/20251213_s3_compatible_storage/index.md
 ```
 
 ## Build
