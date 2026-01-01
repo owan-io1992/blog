@@ -63,13 +63,13 @@ StatefulSet 的所有操作都遵循嚴格的順序，以確保應用程式的�
 
 ```mermaid
 graph TD
-    subgraph Scale Up (0 -> 3)
+    subgraph "Scale Up (0 -> 3)"
         A[Create web-0] --> B(Wait for web-0 Ready)
         B --> C[Create web-1] --> D(Wait for web-1 Ready)
         D --> E[Create web-2] --> F(Wait for web-2 Ready)
     end
 
-    subgraph Scale Down (3 -> 1)
+    subgraph "Scale Down (3 -> 1)"
         G[Terminate web-2] --> H(Wait for web-2 Terminated)
         H --> I[Terminate web-1] --> J(Wait for web-1 Terminated)
     end
