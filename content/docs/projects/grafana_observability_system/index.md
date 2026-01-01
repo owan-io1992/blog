@@ -5,7 +5,7 @@ tags:
 - projects
 title: "implement grafana observability system"
 ---
-![](images/atchitecture-v2.jpg)
+![](images/atchitecture-Page-1.jpg)
 
 <!--more-->
 
@@ -40,3 +40,8 @@ Dynamic Configuration: Managed dashboards and alerts via ConfigMaps or custom co
 * Cost Optimization: Utilized S3 for long-term trace storage.
 * agent: use ansible/helm to deploy agent and exporter.
 * Backend: all backend Deployed a highly available and performant distributed cluster.
+
+
+full architecture  
+![](images/atchitecture-v2.jpg)  
+
