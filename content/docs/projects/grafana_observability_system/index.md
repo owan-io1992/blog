@@ -9,6 +9,7 @@ title: "implement grafana observability system"
 
 <!--more-->
 
+
 # Objective:
 
 To migrate the existing monitoring architecture to the Grafana observability stack, unifying metrics, logs, and traces into a single, cohesive platform.
