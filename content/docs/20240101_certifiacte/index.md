@@ -16,7 +16,7 @@ title: "Certificate"
 | Cisco Certified Network Associate | [CCNA.pdf](./files/CCNA.pdf) |
 | Certified Kubernetes Administrator | [CKA.pdf](./files/CKA.pdf) |
 | Certified Kubernetes Application Developer | [CKAD.pdf](./files/CKAD.pdf) |
-| ISO 27001 Information Security Management | [iso27001.PDF](./files/iso27001.pdf) |
+| ISO 27001 Information Security Management | [iso27001.pdf](./files/iso27001.pdf) |
 
 ## 證書說明
 
