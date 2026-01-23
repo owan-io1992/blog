@@ -12,12 +12,12 @@ https://istio.io/latest/docs/ambient/
 ## install
 ```bash
 # install cli
-mise use -g istioctl@1.26.2
+mise use -g istioctl@1.28.2
 
 
 # install gateway api
 kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null || \
-  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
 
 # pre check
 istioctl version
@@ -44,10 +44,10 @@ istioctl install \
 https://istio.io/latest/docs/ambient/getting-started/deploy-sample-app/
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.26/samples/bookinfo/platform/kube/bookinfo.yaml
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.26/samples/bookinfo/platform/kube/bookinfo-versions.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/bookinfo/platform/kube/bookinfo.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/bookinfo/platform/kube/bookinfo-versions.yaml
 
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.26/samples/bookinfo/gateway-api/bookinfo-gateway.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/bookinfo/gateway-api/bookinfo-gateway.yaml
 kubectl annotate gateway bookinfo-gateway networking.istio.io/service-type=ClusterIP --namespace=default
 
 # access service
@@ -65,15 +65,31 @@ kubectl label namespace default istio.io/dataplane-mode=ambient
 
 Visualize the application and metrics
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.26/samples/addons/prometheus.yaml
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.26/samples/addons/kiali.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/prometheus.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/kiali.yaml
 ```
-
-
-
 
 # issue 
 
 for cilium with kube-proxy replace, need change config 
 https://docs.cilium.io/en/stable/network/servicemesh/istio/#gsg-istio
 
+
+
+# cleanup
+```
+kubectl label namespace default istio.io/use-waypoint-
+istioctl waypoint delete --all
+kubectl label namespace default istio.io/dataplane-mode-
+
+kubectl delete -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/prometheus.yaml
+kubectl delete -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/kiali.yaml
+
+kubectl delete httproute reviews
+kubectl delete authorizationpolicy productpage-viewer
+kubectl delete -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/curl/curl.yaml
+kubectl delete -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/bookinfo/platform/kube/bookinfo.yaml
+kubectl delete -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/bookinfo/platform/kube/bookinfo-versions.yaml
+kubectl delete -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/bookinfo/gateway-api/bookinfo-gateway.yaml
+kubectl delete AuthorizationPolicy productpage-ztunnel
+```

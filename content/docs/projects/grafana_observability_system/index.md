@@ -5,7 +5,7 @@ tags:
 - projects
 title: "implement grafana observability system"
 ---
-![](images/atchitecture-Page-1.jpg)
+![](images/atchitecture.jpg)
 
 <!--more-->
 
