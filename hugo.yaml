@@ -46,14 +46,14 @@ menu:
     # - identifier: versions
     #   name: Versions
     #   weight: 2
-    # - identifier: documentation
-    #   name: Blog
-    #   pageRef: /blog
-    #   weight: 3
     - identifier: tags
       name: Tags
       pageRef: /tags
       weight: 2
+    - identifier: blog
+      name: blog
+      pageRef: /blog
+      weight: 3
     - identifier: about
       name: About
       pageRef: /about
@@ -107,7 +107,7 @@ params:
 
   page:
     # full (100%), wide (90rem), normal (80rem)
-    width: normal
+    width: wide
 
   theme:
     # light | dark | system
@@ -160,7 +160,7 @@ params:
       display: hover
     # linenos: table
   comments:
-    enable: false
+    enable: true
     type: giscus
 
     # https://giscus.app/
