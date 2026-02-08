@@ -4,10 +4,11 @@ draft: false
 tags:
 - linux
 title: "為什麼我選擇 TUXEDO OS 做為我的 Linux Desktop"
-
+image: "cover.png"
 ---
-<div class="tenor-gif-embed" data-postid="27266616" data-share-method="host" data-aspect-ratio="1" data-width="100%"><a href="https://tenor.com/view/yetopen-gif-27266616">Yetopen GIF</a>from <a href="https://tenor.com/search/yetopen-gifs">Yetopen GIFs</a></div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 <!--more-->
+
+<div class="tenor-gif-embed" data-postid="27266616" data-share-method="host" data-aspect-ratio="1" data-width="100%"><a href="https://tenor.com/view/yetopen-gif-27266616">Yetopen GIF</a>from <a href="https://tenor.com/search/yetopen-gifs">Yetopen GIFs</a></div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 
 ## 為什麼要使用 Linux Desktop
 
