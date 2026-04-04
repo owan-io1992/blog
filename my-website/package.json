@@ -19,6 +19,7 @@
     "@docusaurus/plugin-content-pages": "^3.9.2",
     "@docusaurus/preset-classic": "3.9.2",
     "@docusaurus/theme-mermaid": "^3.9.2",
+    "@iconify-json/logos": "^1.2.11",
     "@mdx-js/react": "^3.0.0",
     "@mermaid-js/layout-elk": "^0.2.1",
     "clsx": "^2.0.0",

@@ -15,24 +15,14 @@ mise install
 
 ```bash
 cd my-website
-bun build
+bun start
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-## new post
-
-```bash
-hugo new content [path] [flags]
-
-eg.
-hugo new content content/docs/20260207_tuxedo_linux/index.md
-```
 
 ## Build
 
 ```bash
-hugo
+bun start hugo
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.

@@ -5,13 +5,16 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import { themes as prismThemes } from 'prism-react-renderer';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { version: docusaurusVersion } = require('@docusaurus/core/package.json');
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "owan's Site",
-  tagline: 'Dinosaurs are cool',
+  tagline: '看見世界，沖破艱險，開拓視野，貼近彼此，感受生活，這就是生活的目的',
   favicon: 'img/favicon.ico',
 
 
@@ -19,6 +22,8 @@ const config = {
 
   markdown: {
     mermaid: true,
+    format: 'detect',
+    emoji: true,
   },
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -47,7 +52,7 @@ const config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
-
+  clientModules: [require.resolve('./src/scripts/mermaid_icons.js')],
   presets: [
     [
       'classic',
@@ -156,11 +161,17 @@ const config = {
         //     ],
         //   },
         // ],
-        copyright: `Built with Docusaurus.`,
+        copyright: `Built with Docusaurus v${docusaurusVersion}`,
       },
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+        /* default support language 
+           https://github.com/FormidableLabs/prism-react-renderer/blob/master/packages/generate-prism-languages/index.ts#L10-L25
+           supported-languages 
+           https://prismjs.com/#supported-languages
+        */
+        additionalLanguages: ['bash'],
       },
       mermaid: {
         options: {
@@ -179,7 +190,6 @@ const config = {
         apiKey: 'd98118aa9bb2e73c3d7b39f9b5e5be76',
         indexName: 'blog',
       },
-
     }
     ),
 };
