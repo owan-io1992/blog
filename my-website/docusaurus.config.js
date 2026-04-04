@@ -177,7 +177,7 @@ const config = {
         appId: 'L6LLV1KWOX',
         // Public API key: it is safe to commit it
         apiKey: 'd98118aa9bb2e73c3d7b39f9b5e5be76',
-        indexName: 'docusaurus',
+        indexName: 'blog',
       },
 
     }
