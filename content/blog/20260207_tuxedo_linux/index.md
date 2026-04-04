@@ -74,17 +74,17 @@ Source based 就以 Ubuntu 為主
 更何況新的 Ubuntu LTS 甚至也不會用最新版套件, 變成 feature 的引入可能要等四年  
 ![](https://memeprod.ap-south-1.linodeobjects.com/user-gif-post/1651202709788.gif)
 
-此也有許多人抱怨 也有專門的文章分享如何升級 [Upgrade KDE Plasma](https://www.omgubuntu.co.uk/2025/10/how-to-upgrade-kde-plasma-6-5-kubuntu-25-10)  
+因此也有許多人抱怨 也有專門的文章分享如何升級 [Upgrade KDE Plasma](https://www.omgubuntu.co.uk/2025/10/how-to-upgrade-kde-plasma-6-5-kubuntu-25-10)  
 但這樣不代表能用到最新版本, 加上穩定度堪憂, 因此又繼續尋找下個 distro  
 Ubuntu 官方也做出部分調整 [Moves To Shipping Very Latest Upstream Kernel](https://www.phoronix.com/news/Ubuntu-Releases-Fresher-Kernels)  
-然而究竟未來會如何, 我就以觀望角度看看如何發展, 此時此刻 我是等不了  
+然而究竟未來會如何, 我就以觀望角度看看如何發展, 不論如何, 這時間實在太久,我不想等  
 
 - [Linux Mint](https://linuxmint.com): 算是很多人推薦的系統  
 但在淺嘗 Cinnamon 環境後, 仍覺得 KDE 才能符合我需求, 因此繼續找下個 distro  
 
 - [KDE Neon](https://neon.kde.org): 由 KDE 官方製作的 distro, 就是標榜能用最新的 KDE release  
 雖然有分 Unstable/stable 但是實際用起來 stable 穩定度沒很好  
-更新速度有點過快了  
+因此也常常在解決一些問題  
 
 - [TUXEDO OS](https://www.tuxedocomputers.com/en/TUXEDO-OS_1.tuxedo): 綜觀我前面需求  
 找到這篇文章 [Differences between TUXEDO OS, Kubuntu and KDE Neon](https://www.tuxedocomputers.com/en/Differences-between-TUXEDO-OS-Kubuntu-and-KDE-Neon.tuxedo)  
@@ -99,15 +99,15 @@ Ubuntu 官方也做出部分調整 [Moves To Shipping Very Latest Upstream Kerne
 來說說為什麼要選擇 based on Ubuntu 的 distro  
 
 來自 [Reddit](https://www.reddit.com/r/linux4noobs/comments/1c9u8gd/comment/l0nu8xs/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) 的討論  
-- Ubuntu LTS 給予良好的穩定度
-- Ubuntu 跟商業環境環境相容更好
-- Ubuntu LTS 更新速度比 Debian Stable 快
+- Ubuntu LTS 給予良好的系統穩定度  
+- Ubuntu LTS 普遍硬體支援更好  
 
 然而也因為求穩定(feature 採用慢)+商業考量  
 有些人是不喜歡 Ubuntu 的  
 像是 Ubuntu 採用的 snap 就很多人詬病  
-也因此一些 distro 就是拿 Ubuntu 的好, 去 Ubuntu 不好  
+也因此一些 distro 就是拿 Ubuntu 的好, 去 Ubuntu 的不好  
 變成一個 distro  
+opensource 很常看到的, 我 fork 你的 fork😆  
 
 ## 什麼是 KDE
 
