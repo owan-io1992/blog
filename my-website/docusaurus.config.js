@@ -172,6 +172,14 @@ const config = {
           autoCollapseCategories: true,
         },
       },
+      algolia: {
+        // The application ID provided by Algolia
+        appId: 'DRXSNATY63',
+        // Public API key: it is safe to commit it
+        apiKey: '12f21defb16bf42d85d29ce6e67c813c',
+        indexName: 'docusaurus',
+      },
+
     }
     ),
 };
