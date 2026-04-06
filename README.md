@@ -15,14 +15,15 @@ mise install
 
 ```bash
 cd my-website
-bun start
+bun install
+bun run start
 ```
 
 
 ## Build
 
 ```bash
-bun start hugo
+bun run build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
