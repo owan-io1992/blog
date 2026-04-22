@@ -33,7 +33,7 @@ const config = {
   },
 
   // Set the production url of your site here
-  url: 'https://blog.owanio1992.cloudns.nz',
+  url: 'https://blog.owanio1992.dpdns.org',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
