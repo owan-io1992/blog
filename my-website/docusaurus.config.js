@@ -29,7 +29,7 @@ const config = {
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
-    experimental_faster: true,
+    faster: true,
   },
 
   // Set the production url of your site here
@@ -48,6 +48,10 @@ const config = {
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
+  plugins: [
+    'docusaurus-plugin-image-zoom', 
+  ],
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
@@ -183,6 +187,15 @@ const config = {
           autoCollapseCategories: true,
         },
       },
+      zoom: {
+        selector: '.markdown img',
+        background: {
+          light: 'rgb(255, 255, 255)',
+          dark: 'rgb(50, 50, 50)',
+        },
+        config: {},
+      },
+
       algolia: {
         // The application ID provided by Algolia
         appId: 'L6LLV1KWOX',
@@ -190,8 +203,13 @@ const config = {
         apiKey: 'd98118aa9bb2e73c3d7b39f9b5e5be76',
         indexName: 'blog',
       },
+
+
+      
     }
     ),
+
+
 };
 
 export default config;
