@@ -53,8 +53,8 @@ const config = {
   ],
 
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: 'zh-Hant',
+    locales: ['zh-Hant', 'en'],
   },
   clientModules: [require.resolve('./src/scripts/mermaid_icons.js')],
   presets: [
@@ -118,6 +118,10 @@ const config = {
           {
             href: 'https://github.com/owan-io1992',
             label: 'GitHub',
+            position: 'right',
+          },
+          {
+            type: 'localeDropdown',
             position: 'right',
           },
         ],
