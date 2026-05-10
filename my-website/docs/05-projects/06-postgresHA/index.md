@@ -2,19 +2,13 @@
 tags:
 - projects
 ---
-# postgresHA
+# postgres with pgpool-II
 ![](images/banner.png)
 
-![](images/Gemini_Generated_Image_4eohcb4eohcb4eoh.png)
 
 ## Objective / 目標：  
 建立 postgres 高可用性 cluster  
-使用 pgpool-II 與 pgbouncer 提昇 HA 保護與性能  
-
-> pgbouncer 與 pgpool-II 功能其實有重疊  
-> 在大部分場景 只需要用到 pgpool-II 即可  
-> 會把 pgbouncer 一起使用  
-> 主因在 [CloudNativePG](https://cloudnative-pg.io) 是搭配 pgbouncer, 順便作為學習  
+使用 pgpool-II 提昇 HA 保護與性能  
 
 
 ## 簡介
@@ -61,37 +55,12 @@ Pgpool-II 具備 Watchdog 機制，可以監控資料庫節點的健康狀態：
 5. 限制連線數 (Limiting Exceeding Connections)  
 當連線數超過設定上限時，Pgpool-II 會讓請求排隊等待，而不是直接讓資料庫崩潰，起到緩衝保護的作用。  
 
-### pgbouncer
-如果說 Pgpool-II 像是資料庫的「全能管家」，那麼 Pgbouncer 就是一個「極致專業的門衛」。  
-Pgbouncer 是一款輕量級、高效能的 PostgreSQL 連線池代理伺服器 (Connection Pooler)。它的功能非常專一：管理連線，且把這件事做得比誰都好。  
-
-為什麼需要 Pgbouncer？  
-PostgreSQL 的連線模型是「一個連線、一個進程 (Process)」。  
-每個進程約消耗 2MB - 10MB 的記憶體。  
-當連線數達到數百或上千時，記憶體會被吃光，且 CPU 會花大量時間在處理進程間切換（Context Switching），導致效能大幅下降。  
-
-Pgbouncer 的解決方案：  
-它在前端維持成千上萬個來自客戶端的「虛擬連線」，但在後端只維持極少數（例如幾十個）與資料庫的「實體連線」。  
-
-**三種池化模式 (Pooling Modes)  **
-這是 Pgbouncer 最核心的設定，決定了它如何分配連線：  
-
-Session Pooling (會話池化)：  
-最保險。當客戶端連進來，Pgbouncer 會分配一個實體連線給它，直到該用戶斷開連線為止。  
-
-Transaction Pooling (交易池化)：  
-最常用、效能最高。實體連線只在一個 BEGIN 與 COMMIT 之間分配。交易結束後，連線立刻歸還給池子，讓給下一個人的交易使用。  
-
-Statement Pooling (語句池化)：  
-最激進。每執行完一個 SQL 語句就歸還連線。不支援多語句的交易，使用場景較少。  
-
 ## LAB environment 
 VM * 3
-各自安裝 Pgpool-II, Pgbouncer, PostgreSQL  
+各自安裝 Pgpool-II, PostgreSQL  
 OS: ubuntu 24.04
 postgresql: 18.3
 pgpool-II: 4.7.1
-Pgbouncer: 1.25.1
 
 | hostname | IP             |
 |----------|----------------|
@@ -100,7 +69,7 @@ Pgbouncer: 1.25.1
 | server3  | 192.168.56.103 |
 
 
-architecture  
+範例 architecture  
 此 LAB 中只包含 server1~3  
 ```mermaid
 ---
@@ -114,19 +83,16 @@ flowchart TD
     end
     subgraph server1
       pp1["pgpool 1"]
-      pb1["pgbouncer 1"]
       pg1["postgres 1"]
       pp1 --> pb1 --> pg1
     end
     subgraph server2
       pp2["pgpool 2"]
-      pb2["pgbouncer 2"]
       pg2["postgres 2"]
       pp2 --> pb2 --> pg2
     end
     subgraph server3
       pp3["pgpool 3"]
-      pb3["pgbouncer 3"]
       pg3["postgres 3"]
       pp3 --> pb3 --> pg3
     end
@@ -155,7 +121,7 @@ flowchart TD
 如果以下沒特別說明在哪台執行  
 那就是 host  
 
-## install postgresql, pgpool-II, pgbouncer
+## install postgresql, pgpool-II
 安裝過程很簡單  
 postgres repository 都包含了這些套件  
 只要使用官方提供的 Automated Repository Configuration 就可以一次享有  
@@ -172,12 +138,13 @@ sudo apt update
 # postgresql-18 資料庫本體
 # postgresql-18-pgpool2 資料庫端的擴充套件
 # pgpool2 本體
-sudo apt install -y pgpool2 libpgpool2 postgresql-18 postgresql-18-pgpool2 pgbouncer
+sudo apt install -y pgpool2 libpgpool2 postgresql-18 postgresql-18-pgpool2 
 EOF
 ```
 
 ## config
-### config posgresql
+
+### 重置 postgres 與 pgpool
 在 ubuntu 環境下  
 當安裝好 postgres 便會自動啟動  
 我們要先還原到初始狀態  
@@ -191,7 +158,7 @@ sudo systemctl stop pgpool2
 EOF
 ```
 
-setup ssh key authentication  
+### SSH key authentication
 To use the automated failover and online recovery of Pgpool-II, it is required to configure SSH public key authentication  
 請先自己準備好 ssh key 以下範例已經先產生 key "lab_vm"  
 
@@ -224,7 +191,9 @@ EOF
 ```
 
 
-設定 postgres  
+### config postgresql
+
+#### 建立 cluster 與基本設定
 以下 command 只須執行於 server1  
 
 ```bash
@@ -246,9 +215,8 @@ EOF
 
 
 
-**goto to server1** 
-
-Setting up PostgreSQL users
+#### 建立 PostgreSQL users
+**goto to server1**
 
 | User Name | Password | Detail |
 |-----------|----------|--------|
@@ -272,7 +240,7 @@ postgres=# \q
 
 
 
-create .**pgpass**
+#### 建立 .pgpass
 以下 command 只須執行於 server1  
 
 ```bash
@@ -294,9 +262,11 @@ EOF
 
 
 
-PCP connection authentication (Pgpool Control Protocol)
-To use PCP commands PCP user names and md5 encrypted passwords must be declared in pcp.conf
-後續
+### config pgpool-II
+
+#### PCP connection authentication
+Pgpool Control Protocol (PCP)  
+To use PCP commands PCP user names and md5 encrypted passwords must be declared in pcp.conf  
 以下 command 只須執行於 server1  
 
 ```bash
@@ -314,9 +284,8 @@ EOF
 ```
 
 
-**Create pgpool_node_id**
-
-If watchdog feature is enabled, to distinguish which host is which, a pgpool_node_id file is required
+#### Create pgpool_node_id
+If watchdog feature is enabled, to distinguish which host is which, a pgpool_node_id file is required  
 務必照順序,由 0 開始 不可跳號
 ```bash
 ssh server1 "echo 0 | sudo tee /etc/pgpool2/pgpool_node_id"
@@ -324,7 +293,7 @@ ssh server2 "echo 1 | sudo tee /etc/pgpool2/pgpool_node_id"
 ssh server3 "echo 2 | sudo tee /etc/pgpool2/pgpool_node_id"
 ```
 
-Pgpool-II Configuration
+#### Pgpool-II Configuration (pgpool.conf)
 以下 command 只須執行於 server1  
 
 ```bash
@@ -457,7 +426,8 @@ EOF
 ```
 
 
-goto server1, setup pool_passwd
+#### setup pool_passwd
+goto server1
 ```bash
 sudo pg_enc -m -k /var/lib/postgresql/.pgpoolkey -u pgpool -p
 sudo pg_enc -m -k /var/lib/postgresql/.pgpoolkey -u postgres -p
@@ -468,7 +438,7 @@ sudo cat /etc/pgpool2/pool_passwd
 
 
 
-Watchdog Configuration
+#### Watchdog Configuration
 以下 command 只須執行於 server1  
 ```bash
 ssh server1 <<EOF
@@ -508,11 +478,11 @@ EEOF
 EOF
 ```
 
-Logging
+#### Logging
 default pgpool 是 logging 到 stderr  
 用 journalctl 就可以看到 log  
 
-sync config from server1 to server2,server3
+### 同步 config 到 server2, server3
 ```bash
 for h in server2 server3; do
   # /etc/pgpool2/ — owner root, default mode
@@ -538,14 +508,17 @@ done
 ```
 
 
-重起 pgpool
+### 啟動與驗證
+
+#### 重啟 pgpool
 ```
 ssh server1 "sudo systemctl restart pgpool2"
 ssh server2 "sudo systemctl restart pgpool2"
 ssh server3 "sudo systemctl restart pgpool2"
 ```
 
-嘗試確認 pgpool 狀態(可於 host or server1)  
+#### 確認 pgpool 狀態
+可於 host or server1 執行  
 ```bash
 psql -h 192.168.56.101 -p 9999 -U pgpool postgres -c "show pool_nodes"
 ```
@@ -562,6 +535,7 @@ Password for user pgpool:
 
 ```
 
+#### 修復節點
 由於此於我們只完成 server1 的 postgres 設定  
 因此看到 server2,server3 是 down 的狀態是正常  
 於任一 server 使用 pcp_recovery_node 修復節點
