@@ -202,10 +202,10 @@ const config = {
 
       algolia: {
         // The application ID provided by Algolia
-        appId: 'L6LLV1KWOX',
+        appId: '87Q9AS4WGE',
         // Public API key: it is safe to commit it
-        apiKey: 'd98118aa9bb2e73c3d7b39f9b5e5be76',
-        indexName: 'blog',
+        apiKey: 'b7edaab00fb161ffae2d3e502baa93c3',
+        indexName: 'docusaurus',
       },
 
 
