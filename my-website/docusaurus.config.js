@@ -14,9 +14,7 @@ const { version: docusaurusVersion } = require('@docusaurus/core/package.json');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "owan's Site",
-  tagline: '看見世界，沖破艱險，開拓視野，貼近彼此，感受生活，這就是生活的目的',
   favicon: 'img/favicon.ico',
-
 
   themes: ['@docusaurus/theme-mermaid'],
 
@@ -49,7 +47,7 @@ const config = {
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   plugins: [
-    'docusaurus-plugin-image-zoom', 
+    'docusaurus-plugin-image-zoom',
   ],
 
   i18n: {
@@ -209,7 +207,7 @@ const config = {
       },
 
 
-      
+
     }
     ),
 

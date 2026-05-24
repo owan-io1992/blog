@@ -1,0 +1,26 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.docSidebar.category.k8s doc reading": {
+    "message": "k8s doc reading",
+    "description": "The label for category 'k8s doc reading' in sidebar 'docSidebar'"
+  },
+  "sidebar.docSidebar.category.k3s": {
+    "message": "k3s",
+    "description": "The label for category 'k3s' in sidebar 'docSidebar'"
+  },
+  "sidebar.docSidebar.category.k8s 筆記": {
+    "message": "k8s 筆記",
+    "description": "The label for category 'k8s 筆記' in sidebar 'docSidebar'"
+  },
+  "sidebar.docSidebar.category.monorepop": {
+    "message": "monorepop",
+    "description": "The label for category 'monorepop' in sidebar 'docSidebar'"
+  },
+  "sidebar.docSidebar.category.project": {
+    "message": "project",
+    "description": "The label for category 'project' in sidebar 'docSidebar'"
+  }
+}
