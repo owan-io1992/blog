@@ -57,3 +57,16 @@ distrobox-export --app spectacle
 
 就完成無縫切換 spectacle 版本了  
 意外的簡單, 可喜可賀  
+
+## update 
+進行 distrobox 更新  
+```
+# list box
+❯ distrobox ls --root
+ID           | NAME                 | STATUS             | IMAGE
+b823983a6e3d | neon-user            | Up 4 hours         | invent-registry.kde.org/neon/docker-images/plasma:user
+
+# update box
+distrobox upgrade neon-user --root
+
+```
