@@ -177,7 +177,7 @@ const config = {
            supported-languages 
            https://prismjs.com/#supported-languages
         */
-        additionalLanguages: ['bash'],
+        additionalLanguages: ['bash','yaml'],
       },
       mermaid: {
         options: {
