@@ -2,6 +2,8 @@
 title: 介紹 metalLB
 tags: [metalLB]
 ---
+![banner](banner.png)
+<!-- truncate -->
 
 [metallb](https://metallb.io) 用於 k8s 中當作 loadbalancer 的 provider  
 也是讓 service 可以夠過 mode: loadBalancer 來取得 external-IP  
