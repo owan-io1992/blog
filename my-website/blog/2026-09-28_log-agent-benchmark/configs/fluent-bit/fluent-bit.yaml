@@ -19,6 +19,9 @@ pipeline:
       file_cache_advise: false
       inotify_watcher: false
       threaded: true
+      db: /fluent-bit/tail.db
+      db.sync: normal
+      db.locking: true
 
   outputs:
     - name: null

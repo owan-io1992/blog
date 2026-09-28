@@ -1,5 +1,5 @@
 ---
-title: "Log Agent 深度對比：Fluent Bit vs Vector vs Elastic Agent"
+title: "Fluent Bit vs Vector vs Elastic Agent 深度對比"
 description: "全面比較雲原生主流日誌收集工具 Fluent Bit、Vector 與 Elastic Agent 的核心架構、GitHub 熱度、Parser 資料處理能力、資源開銷與實戰 Benchmark"
 tags: [logging, devops, k8s, benchmark]
 ---
@@ -378,92 +378,25 @@ output.console:
 | **集中管控體驗** | ⭐️⭐️⭐️ (依賴外部 GitOps 工具) | ⭐️⭐️⭐️ (依賴外部 GitOps 工具) | ⭐️⭐️⭐️⭐️⭐️ (原生 Fleet UI 一站式維運) |
 | **涵蓋範疇** | Logs, Metrics, Traces | Logs, Metrics, Traces | Logs, Metrics, APM, Security (EDR/XDR) |
 | **背壓控制與緩衝** | 記憶體 Buffer + 磁碟檔案儲存 | 記憶體 Buffer + 高效能磁碟佇列 (Disk Buffer) | 內部記憶體佇列 + Spool to disk |
+| **學習成本與上手門檻** | ⭐️⭐️⭐️ (中等，配置語法需熟悉多種 Plugin 語法，進階處理需寫 Lua) | ⭐️⭐️⭐️⭐️ (低至中等，文件優異，VRL 直覺好寫且有除錯工具) | ⭐️⭐️⭐️⭐️⭐️ (極低，透過 Fleet Web UI 點選整合，但自訂 Ingest Pipeline 偏繁瑣) |
 
 
 ---
 
 ## 八、實戰 Benchmark：本機 Docker Compose 效能測試
 
-為了真實量化三者的資源消耗與吞吐能力，我們設計了一套本機 Docker 基準測試環境。
+為了真實量化三者的資源消耗與吞吐能力，我們設計了一套以 Docker Compose 與 `mingrammer/flog` 為核心的自動化基準壓測方案。
 
-測試所使用的日誌產生器映像檔：
+本測試針對三大 Agent 進行了持續 **60 秒、累積超過 960 萬筆高頻 JSON 日誌** 的極限性能測試，全面記錄 **CPU 使用率、記憶體 (RSS)、BLOCK I/O 零磁碟讀取、以及每秒處理筆數**。
 
-```bash
-docker pull harbor.owanio1992.dpdns.org/infra/log-tester@sha256:d023f2ac20ab6a662aad0496c837bdff7e9265398327215048a7935411050766
-```
+> 👉 **完整測試環境、自動化腳本與 60 秒深度數據分析請參閱專屬評測專文：**  
+> 🔗 **[Fluent Bit vs Vector vs Filebeat 效能壓測評測](../2026-09-28_log-agent-benchmark/index.md)**
 
-### 1. 測試架構設計
+### 重點結論快覽
 
-* **日誌產生器 (**`**log-tester**`**)**：高頻產生標準 JSON 日誌（每批次包含 INFO/WARN/ERROR/CRITICAL 等級訊息），持續寫入共享磁區 `/var/log/app/app.log`。
-* **待測 Agent (**`**fluent-bit**`**,** `**vector**`**,** `**filebeat/elastic-agent**`**)**：以獨立容器掛載共享日誌目錄，即時 Tail 該檔案並完成 JSON 解析與欄位處理，最後將輸出丟棄至 `null` 或 `blackhole`，以排除外部網路與儲存後端的 I/O 瓶頸，純粹測試 **收集 + 解析引擎** 的運算開銷。
-* **指標監控**：透過 `docker stats` 即時記錄容器 CPU% 與 Memory (RSS)，並透過各元件的指標端點（Fluent Bit `:2020` Prometheus、Vector `:9090` Prometheus、Filebeat `:5066` HTTP Stats）統計實際處理筆數。
-
-### 2. 測試數據與實測結果 (60 秒高頻壓測)
-
-在相同硬體環境下，日誌產生器使用 `mingrammer/flog` 持續高頻輸出，在 60 秒內累積寫入超過 **960 萬筆** JSON 日誌（約 434MB），各 Agent 的 60 秒資源佔用快照與吞吐統計如下：
-
-```text
---- 壓測持續 60 秒後的資源佔用快照 ---
-NAME                   CPU %     MEM USAGE / LIMIT     BLOCK I/O     NET I/O
-benchmark-log-tester   110.41%   17.06MiB / 42.81GiB   0B / 434MB    15.8kB / 126B
-benchmark-fluent-bit   4.71%     137.4MiB / 42.81GiB   0B / 0B       15.3kB / 126B
-benchmark-vector       197.45%   308.3MiB / 42.81GiB   0B / 2.68MB   15.3kB / 126B
-benchmark-filebeat     242.25%   123.1MiB / 42.81GiB   0B / 2.81MB   14.8kB / 126B
-
-[4/4] 統計各 Agent 吞吐與處理筆數：
-Agent           Ingested (讀取筆數) Processed (完成/寫出) Status / 隊列
---------------- ------------------ ------------------ ------------
-Fluent Bit      9382940            9218259            OK          
-Vector          9641367            9640201            OK          
-Filebeat        5082673            5081600            In-flight: 1073
-```
-
-#### 綜合維度對比表
-
-| 評測維度 | Fluent Bit (v5.1) | Vector (v0.58) | Filebeat (v8.19) |
-| :--- | :--- | :--- | :--- |
-| **完成處理筆數 (60s)** | **9,218,259** (921 萬筆) | **9,640,201** (964 萬筆) 🏆 | 5,081,600 (508 萬筆) |
-| **平均 CPU 佔用** | 🟢 **4% ~ 8%** (極致省電) 🏆 | 🔴 **~200%** (約滿載 2 顆 Core) | 🔴 **~240%** (約滿載 2.4 顆 Core) |
-| **記憶體佔用 (RSS)** | 🟢 **~137 MiB** | 🟡 **~308 MiB** | 🟢 **~123 MiB** 🏆 |
-| **BLOCK I/O (Read)** | 🟢 **0B** (完全命中 Page Cache) | 🟢 **0B** (完全命中 Page Cache) | 🟢 **0B** (完全命中 Page Cache) |
-| **BLOCK I/O (Write)**| 🟢 **0B** (純記憶體緩衝) | 🟡 **~2.68 MB** (持久化 Checkpoint) | 🟡 **~2.81 MB** (持久化 Registry) |
-| **單位 CPU 處理效率**| 🔥 **最高 (冠絕群雄)** | 中等 (高吞吐換取高 CPU) | 偏低 |
-
-> **實測深度洞察 (Benchmark Insights)**：
->
-> 1. **Fluent Bit（極致效能資源比 Performance-per-Watt）**：
->    在關閉 `file_cache_advise: false`（避免主動丟棄 Page Cache）並啟用 `threaded: true` 與 `workers: 2` 後，吞吐量高達 **921 萬筆**（僅落後 Vector 4.3%），而 **CPU 消耗僅 4% ~ 8%**（不到 0.1 顆 Core）。在 Kubernetes 規模化節點中能大幅削減 DaemonSet 的算力成本。
-> 2. **Vector（吞吐之王，專為極致性能壓榨設計）**：
->    吞吐量全場第一（**964 萬筆**，100% 即時消化無延遲），Rust 並行架構與 VRL 表達式極為強悍。但代價是主動拉滿約 2 顆 CPU 核心（~200%）與 308 MiB 記憶體，非常適合部署在集中式中繼彙總層（Aggregator）。
-> 3. **Filebeat（Go 語言在高頻下的瓶頸）**：
->    CPU 消耗最高（**~240%**，吃滿近 2.5 顆 Core），但最終完成量僅 **508 萬筆**（約前兩者的 53%），且隊列仍有延遲積壓。Go 的垃圾回收（GC）與 Channel 調度開銷在百萬級高吞吐下明顯重於 C 與 Rust。
-
-
-### 3. 如何在本機重現測試？
-
-完整測試環境與設定檔已收錄於專屬的文章專案目錄 `blog/2026-09-28_log-agent-benchmark/` 中，詳細的即時快照紀錄與深度分析請參閱專屬評測文章：[Log Agent Benchmark 實戰評測](../2026-09-28_log-agent-benchmark/index.md)。
-
-```bash
-# 進入 benchmark 獨立文章目錄
-cd blog/2026-09-28_log-agent-benchmark/
-
-# 執行自動化測試腳本 (包含環境初始化、60秒壓測與指標擷取)
-./run-benchmark.sh
-```
-
-如需手動啟動並觀察即時監控：
-
-```bash
-# 啟動測試環境
-docker compose up -d
-
-# 觀察即時資源消耗
-docker stats benchmark-fluent-bit benchmark-vector benchmark-filebeat
-
-# 測試完成後清理
-docker compose down -v
-```
-
+* **Fluent Bit (C)**：在調優 `file_cache_advise: false` 與啟用 `threaded: true` 後，以 **不到 10% 的極低 CPU 消耗（4% ~ 8%）** 處理了超過 **921 萬筆** 日誌，實現完全零磁碟讀取（0B Block I/O），效能資源比（Performance-per-Watt）最為優異。
+* **Vector (Rust)**：以 **964 萬筆** 拿下吞吐量第一，零隊列延遲積壓，但主動拉滿約 2 顆 CPU 核心（~200% CPU）與 308 MiB 記憶體，非常適合部署在集中式彙總轉發層（Aggregator）。
+* **Filebeat (Go)**：CPU 佔用最高（~240%），但吞吐量僅有前兩者的約一半（508 萬筆），在高頻百萬級處理下受限於 Go 的 GC 與通道開銷。
 
 ---
 
