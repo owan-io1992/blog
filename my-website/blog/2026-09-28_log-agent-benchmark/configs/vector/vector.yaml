@@ -1,0 +1,35 @@
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+sources:
+  app_log:
+    type: file
+    include:
+      - /var/log/app/app.log
+    read_from: beginning
+  internal_metrics:
+    type: internal_metrics
+
+transforms:
+  parse_json:
+    type: remap
+    inputs:
+      - app_log
+    source: |
+      parsed, err = parse_json(.message)
+      if err == null {
+        . = merge!(., parsed)
+        del(.message)
+      }
+
+sinks:
+  blackhole:
+    type: blackhole
+    inputs:
+      - parse_json
+  prometheus:
+    type: prometheus_exporter
+    inputs:
+      - internal_metrics
+    address: 0.0.0.0:9090

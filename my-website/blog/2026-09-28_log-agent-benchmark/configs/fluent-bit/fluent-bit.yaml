@@ -1,0 +1,26 @@
+service:
+  flush: 1
+  log_level: info
+  http_server: on
+  http_listen: 0.0.0.0
+  http_port: 2020
+
+pipeline:
+  inputs:
+    - name: tail
+      tag: app.logs
+      path: /var/log/app/app.log
+      read_from_head: true
+      parser: json
+      mem_buf_limit: 50MB
+      buffer_chunk_size: 512k
+      buffer_max_size: 2M
+      event_batch_size: 4096
+      file_cache_advise: false
+      inotify_watcher: false
+      threaded: true
+
+  outputs:
+    - name: null
+      match: "*"
+      workers: 2

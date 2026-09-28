@@ -1,0 +1,52 @@
+services:
+  # 1. Log Source: High throughput log generator using flog
+  log-tester:
+    image: mingrammer/flog:latest
+    container_name: benchmark-log-tester
+    volumes:
+      - shared-logs:/var/log/app
+    command: ["flog", "-f", "json", "-t", "log", "-o", "/var/log/app/app.log", "-s", "1ms", "-n", "10000", "-l"]
+
+  # 2. Fluent Bit (C based)
+  fluent-bit:
+    image: cr.fluentbit.io/fluent/fluent-bit:5.1.2
+    container_name: benchmark-fluent-bit
+    depends_on:
+      - log-tester
+    volumes:
+      - shared-logs:/var/log/app:ro
+      - ./configs/fluent-bit/fluent-bit.yaml:/fluent-bit/etc/fluent-bit.yaml:ro
+    ports:
+      - "2020:2020"
+    command: ["-c", "/fluent-bit/etc/fluent-bit.yaml"]
+
+  # 3. Vector (Rust based)
+  vector:
+    image: timberio/vector:0.58.0-alpine
+    container_name: benchmark-vector
+    depends_on:
+      - log-tester
+    volumes:
+      - shared-logs:/var/log/app:ro
+      - ./configs/vector/vector.yaml:/etc/vector/vector.yaml:ro
+    ports:
+      - "8686:8686"
+      - "9090:9090"
+    command: ["--config", "/etc/vector/vector.yaml"]
+
+  # 4. Elastic Agent Engine (Go based / Filebeat)
+  elastic-filebeat:
+    image: docker.elastic.co/beats/filebeat:8.19.22
+    container_name: benchmark-filebeat
+    user: root
+    depends_on:
+      - log-tester
+    volumes:
+      - shared-logs:/var/log/app:ro
+      - ./configs/elastic-agent/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+    ports:
+      - "5066:5066"
+    command: ["-e", "--strict.perms=false"]
+
+volumes:
+  shared-logs:

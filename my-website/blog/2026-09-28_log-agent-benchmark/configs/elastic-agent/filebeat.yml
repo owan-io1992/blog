@@ -1,0 +1,17 @@
+filebeat.inputs:
+  - type: filestream
+    id: app-log-stream
+    paths:
+      - /var/log/app/app.log
+    parsers:
+      - ndjson:
+          target: ""
+          overwrite_keys: true
+
+output.file:
+  path: "/dev"
+  filename: "null"
+
+http.enabled: true
+http.host: 0.0.0.0
+http.port: 5066
