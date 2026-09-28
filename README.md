@@ -7,9 +7,32 @@ This website is built using [docusaurus](https://docusaurus.io)
 ```bash
 mise trust
 mise install
+mise run install
 ```
 
-## Local Development
+## Quick Start (with mise tasks)
+
+You can manage all tasks directly from the project root using `mise run`:
+
+| Task | Command | Description |
+| :--- | :--- | :--- |
+| **Install** | `mise run install` | Install website dependencies |
+| **Dev** | `mise run dev` | Start development server (supports flags, e.g. `mise run dev -- --locale en`) |
+| **Build** | `mise run build` | Build static website for production |
+| **Update** | `mise run update` | Update dependencies (`bun update && bun install`) |
+| **i18n Extract** | `mise run i18n:extract -- [locale]` | Extract translation strings (defaults to `en`) |
+| **i18n Copy** | `mise run i18n:copy-content` | Copy docs & blog content to `i18n/zh-Hant/` |
+
+List all available tasks:
+```bash
+mise tasks
+```
+
+---
+
+## Traditional Commands (Manual)
+
+### Local Development
 
 ```bash
 cd my-website
@@ -17,10 +40,10 @@ bun install
 bun run start
 ```
 
-
-## Build
+### Build
 
 ```bash
+cd my-website
 bun run build
 ```
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
@@ -40,8 +63,11 @@ Mark your custom React elements using the `@docusaurus/Translate` API:
 Extract all marked strings from the codebase to the translation directory:
 
 ```bash
+# Using mise:
+mise run i18n:extract -- en
+
+# Or manually:
 cd my-website
-# Extract strings for a specific locale (e.g., zh-Hant)
 bun run write-translations -- --locale en
 ```
 
@@ -52,12 +78,14 @@ This generates `i18n/<locale>/code.json` and theme configs under `i18n/<locale>/
 Copy the Markdown files from `docs/`, `blog/`, or `src/pages/` to their respective translation folders:
 
 ```bash
+# Using mise:
+mise run i18n:copy-content
+
+# Or manually:
 cd my-website
-# Translate docs
 mkdir -p i18n/zh-Hant/docusaurus-plugin-content-docs/current
 cp -r docs/. i18n/zh-Hant/docusaurus-plugin-content-docs/current
 
-# Translate blog posts
 mkdir -p i18n/zh-Hant/docusaurus-plugin-content-blog
 cp -r blog/. i18n/zh-Hant/docusaurus-plugin-content-blog
 ```
@@ -69,14 +97,24 @@ Then edit the copied Markdown files.
 To run the local development server for a specific locale:
 
 ```bash
+# Using mise:
+mise run dev -- --locale en
+
+# Or manually:
 cd my-website
 bun run start -- --locale en
 ```
 
-Building the website with `bun run build` will build all configured locales automatically.
+Building the website with `mise run build` (or `bun run build`) will build all configured locales automatically.
 
-## update docusaurus
-```
+## Update Docusaurus
+
+```bash
+# Using mise:
+mise run update
+
+# Or manually:
+cd my-website
 bun update
 bun install
 ```
