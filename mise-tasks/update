@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Update dependencies using bun update"
+set -e
+cd my-website
+bun update
+bun install

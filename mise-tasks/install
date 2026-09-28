@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Install dependencies using bun"
+set -e
+cd my-website
+bun install

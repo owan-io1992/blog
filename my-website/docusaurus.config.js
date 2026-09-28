@@ -79,7 +79,7 @@ const config = {
           editUrl:
             'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
           // Useful options to enforce blogging best practices
-          onInlineTags: 'warn',
+          onInlineTags: 'ignore',
           onInlineAuthors: 'warn',
           onUntruncatedBlogPosts: 'warn',
         },
@@ -112,6 +112,7 @@ const config = {
             label: 'Docs',
           },
           { to: '/blog', label: 'Blog', position: 'left' },
+          { to: '/blog/tags', label: 'Tags', position: 'left' },
           { to: '/certificate', label: 'Certificate', position: 'left' },
           {
             href: 'https://github.com/owan-io1992',

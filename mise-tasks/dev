@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Start Docusaurus local development server"
+cd my-website && bun run start "$@"

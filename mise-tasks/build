@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+#MISE description="Build static website for production"
+set -e
+cd my-website
+bun run build "$@"

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Extract strings for translation (usage: mise run i18n:extract -- [locale])"
+set -e
+cd my-website
+LOCALE="${1:-en}"
+bun run write-translations -- --locale "${LOCALE}"

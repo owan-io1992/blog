@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE description="Copy Markdown content to zh-Hant translation folders"
+set -e
+cd my-website
+mkdir -p i18n/zh-Hant/docusaurus-plugin-content-docs/current
+cp -r docs/. i18n/zh-Hant/docusaurus-plugin-content-docs/current
+
+mkdir -p i18n/zh-Hant/docusaurus-plugin-content-blog
+cp -r blog/. i18n/zh-Hant/docusaurus-plugin-content-blog
+echo "Markdown content copied to i18n/zh-Hant/ successfully."
