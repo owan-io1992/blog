@@ -3,7 +3,7 @@ tags:
 - projects
 ---
 # implement grafana observability system
-![](images/atchitecture.jpg)
+![](images/architecture.drawio.png)
 
 
 
