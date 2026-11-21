@@ -15,9 +15,9 @@
     "message": "k8s 筆記",
     "description": "The label for category 'k8s 筆記' in sidebar 'docSidebar'"
   },
-  "sidebar.docSidebar.category.monorepop": {
-    "message": "monorepop",
-    "description": "The label for category 'monorepop' in sidebar 'docSidebar'"
+  "sidebar.docSidebar.category.monorepo": {
+    "message": "monorepo",
+    "description": "The label for category 'monorepo' in sidebar 'docSidebar'"
   },
   "sidebar.docSidebar.category.project": {
     "message": "project",

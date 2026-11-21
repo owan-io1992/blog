@@ -3,10 +3,10 @@ tags:
 - projects
 ---
 # Poly-repo to Monorepo Migration for CI/CD Modernization
-![alt](images/architecture.jpg)  
+![CI/CD & GitOps Architecture](images/architecture.drawio.png)  
 
 
-![alt text](images/flow_enhance.jpg)
+![Before vs. After Migration](images/flow_enhance.drawio.png)
 
 ## Objective (目標):
 
